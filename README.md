@@ -282,9 +282,6 @@ Production deployment is handled separately.
 | Website              | `https://arniston.duckdns.org/`                    |
 | Database             | MySQL                                              |
 | CI/CD                | GitHub Actions                                     |
-| Presentation / Video | To be added                                        |
-| Deployment Evidence  | To be added                                        |
-| Hosting Rationale    | To be added                                        |
 
 ## Team Contributions
 
