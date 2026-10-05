@@ -1,6 +1,7 @@
 ﻿using Arniston_Letting_API.Data;
 using Arniston_Letting_API.DTOs.Breakages;
 using Arniston_Letting_API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace Arniston_Letting_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class BreakagesController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -21,49 +23,35 @@ public class BreakagesController : ControllerBase
     public async Task<ActionResult<IEnumerable<BreakageDto>>> GetBreakages()
     {
         var breakages = await _context.Breakages
+            .AsNoTracking()
             .Include(b => b.Location)
             .OrderByDescending(b => b.Date)
             .ThenByDescending(b => b.Time)
-            .Select(b => new BreakageDto
-            {
-                BreakageId = b.BreakageId,
-                LocationId = b.LocationId,
-                LocationName = b.Location != null
-                    ? b.Location.PropertyName
-                    : string.Empty,
-                BookingId = b.BookingId,
-                Date = b.Date,
-                Time = b.Time,
-                ReportedBy = b.ReportedBy,
-                Notes = b.Notes,
-                Resolved = b.Resolved
-            })
             .ToListAsync();
 
-        return Ok(breakages);
+        var result = breakages.Select(b => new BreakageDto
+        {
+            BreakageId = b.BreakageId,
+            LocationId = b.LocationId,
+            LocationName = b.Location?.PropertyName ?? string.Empty,
+            BookingId = b.BookingId,
+            Date = b.Date,
+            Time = b.Time,
+            ReportedBy = b.ReportedBy,
+            Notes = b.Notes,
+            Resolved = b.Resolved
+        });
+
+        return Ok(result);
     }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<BreakageDto>> GetBreakage(int id)
     {
         var breakage = await _context.Breakages
+            .AsNoTracking()
             .Include(b => b.Location)
-            .Where(b => b.BreakageId == id)
-            .Select(b => new BreakageDto
-            {
-                BreakageId = b.BreakageId,
-                LocationId = b.LocationId,
-                LocationName = b.Location != null
-                    ? b.Location.PropertyName
-                    : string.Empty,
-                BookingId = b.BookingId,
-                Date = b.Date,
-                Time = b.Time,
-                ReportedBy = b.ReportedBy,
-                Notes = b.Notes,
-                Resolved = b.Resolved
-            })
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(b => b.BreakageId == id);
 
         if (breakage == null)
         {
@@ -73,7 +61,20 @@ public class BreakagesController : ControllerBase
             });
         }
 
-        return Ok(breakage);
+        var result = new BreakageDto
+        {
+            BreakageId = breakage.BreakageId,
+            LocationId = breakage.LocationId,
+            LocationName = breakage.Location?.PropertyName ?? string.Empty,
+            BookingId = breakage.BookingId,
+            Date = breakage.Date,
+            Time = breakage.Time,
+            ReportedBy = breakage.ReportedBy,
+            Notes = breakage.Notes,
+            Resolved = breakage.Resolved
+        };
+
+        return Ok(result);
     }
 
     [HttpPost]
@@ -86,6 +87,7 @@ public class BreakagesController : ControllerBase
         }
 
         var locationExists = await _context.Properties
+            .AsNoTracking()
             .AnyAsync(p => p.PropertyId == request.LocationId);
 
         if (!locationExists)
@@ -98,14 +100,24 @@ public class BreakagesController : ControllerBase
 
         if (request.BookingId.HasValue)
         {
-            var bookingExists = await _context.Bookings
-                .AnyAsync(b => b.BookingId == request.BookingId.Value);
+            var booking = await _context.Bookings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    b => b.BookingId == request.BookingId.Value);
 
-            if (!bookingExists)
+            if (booking == null)
             {
                 return BadRequest(new
                 {
                     message = "The selected booking does not exist."
+                });
+            }
+
+            if (booking.PropertyId != request.LocationId)
+            {
+                return BadRequest(new
+                {
+                    message = "The selected booking does not belong to the selected property."
                 });
             }
         }
@@ -116,8 +128,8 @@ public class BreakagesController : ControllerBase
             BookingId = request.BookingId,
             Date = request.Date,
             Time = request.Time,
-            ReportedBy = request.ReportedBy,
-            Notes = request.Notes,
+            ReportedBy = request.ReportedBy?.Trim(),
+            Notes = request.Notes?.Trim(),
             Resolved = request.Resolved
         };
 
@@ -125,24 +137,22 @@ public class BreakagesController : ControllerBase
 
         await _context.SaveChangesAsync();
 
-        var result = await _context.Breakages
-            .Include(b => b.Location)
-            .Where(b => b.BreakageId == breakage.BreakageId)
-            .Select(b => new BreakageDto
-            {
-                BreakageId = b.BreakageId,
-                LocationId = b.LocationId,
-                LocationName = b.Location != null
-                    ? b.Location.PropertyName
-                    : string.Empty,
-                BookingId = b.BookingId,
-                Date = b.Date,
-                Time = b.Time,
-                ReportedBy = b.ReportedBy,
-                Notes = b.Notes,
-                Resolved = b.Resolved
-            })
-            .FirstAsync();
+        await _context.Entry(breakage)
+            .Reference(b => b.Location)
+            .LoadAsync();
+
+        var result = new BreakageDto
+        {
+            BreakageId = breakage.BreakageId,
+            LocationId = breakage.LocationId,
+            LocationName = breakage.Location?.PropertyName ?? string.Empty,
+            BookingId = breakage.BookingId,
+            Date = breakage.Date,
+            Time = breakage.Time,
+            ReportedBy = breakage.ReportedBy,
+            Notes = breakage.Notes,
+            Resolved = breakage.Resolved
+        };
 
         return CreatedAtAction(
             nameof(GetBreakage),
@@ -172,6 +182,7 @@ public class BreakagesController : ControllerBase
         }
 
         var locationExists = await _context.Properties
+            .AsNoTracking()
             .AnyAsync(p => p.PropertyId == request.LocationId);
 
         if (!locationExists)
@@ -184,14 +195,24 @@ public class BreakagesController : ControllerBase
 
         if (request.BookingId.HasValue)
         {
-            var bookingExists = await _context.Bookings
-                .AnyAsync(b => b.BookingId == request.BookingId.Value);
+            var booking = await _context.Bookings
+                .AsNoTracking()
+                .FirstOrDefaultAsync(
+                    b => b.BookingId == request.BookingId.Value);
 
-            if (!bookingExists)
+            if (booking == null)
             {
                 return BadRequest(new
                 {
                     message = "The selected booking does not exist."
+                });
+            }
+
+            if (booking.PropertyId != request.LocationId)
+            {
+                return BadRequest(new
+                {
+                    message = "The selected booking does not belong to the selected property."
                 });
             }
         }
@@ -200,8 +221,8 @@ public class BreakagesController : ControllerBase
         breakage.BookingId = request.BookingId;
         breakage.Date = request.Date;
         breakage.Time = request.Time;
-        breakage.ReportedBy = request.ReportedBy;
-        breakage.Notes = request.Notes;
+        breakage.ReportedBy = request.ReportedBy?.Trim();
+        breakage.Notes = request.Notes?.Trim();
         breakage.Resolved = request.Resolved;
 
         await _context.SaveChangesAsync();

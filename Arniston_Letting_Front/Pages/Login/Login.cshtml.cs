@@ -7,74 +7,106 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Arniston_Letting_Front.Pages.Login
-{
-    [AllowAnonymous]
-    public class LoginModel : PageModel
-    {
-        private readonly IAuthApiService _authApiService;
+namespace Arniston_Letting_Front.Pages.Login;
 
-        public LoginModel(IAuthApiService authApiService)
+[AllowAnonymous]
+public class LoginModel : PageModel
+{
+    private readonly IAuthApiService _authApiService;
+
+    public LoginModel(IAuthApiService authApiService)
+    {
+        _authApiService = authApiService;
+    }
+
+    [BindProperty]
+    public LoginRequest LoginRequest { get; set; } = new();
+
+    [BindProperty(SupportsGet = true)]
+    public string? ReturnUrl { get; set; }
+
+    public IActionResult OnGet()
+    {
+        if (User.Identity?.IsAuthenticated == true)
         {
-            _authApiService = authApiService;
+            return RedirectToPage("/Admin/AdminDashboard");
         }
 
-        [BindProperty]
-        public LoginRequest LoginRequest { get; set; } = new();
+        return Page();
+    }
 
-        [BindProperty(SupportsGet = true)]
-        public string? ReturnUrl { get; set; }
-
-        public IActionResult OnGet()
+    public async Task<IActionResult> OnPostAsync()
+    {
+        if (!ModelState.IsValid)
         {
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                return RedirectToPage("/Admin/AdminDashboard");
-            }
+            return Page();
+        }
+
+        var response = await _authApiService.LoginAsync(LoginRequest);
+
+        if (response == null ||
+            !response.Success ||
+            string.IsNullOrWhiteSpace(response.Token))
+        {
+            ModelState.AddModelError(
+                string.Empty,
+                response?.Message ??
+                "Invalid email or password, or the API is unavailable.");
 
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        var claims = new List<Claim>
         {
-            if (!ModelState.IsValid)
+            new(
+                ClaimTypes.NameIdentifier,
+                response.UserId.ToString()),
+
+            new(
+                ClaimTypes.Name,
+                $"{response.FirstName} {response.LastName}".Trim()),
+
+            new(
+                ClaimTypes.Email,
+                response.Email),
+
+            new(
+                ClaimTypes.Role,
+                response.Role)
+        };
+
+        var identity = new ClaimsIdentity(
+            claims,
+            CookieAuthenticationDefaults.AuthenticationScheme);
+
+        var properties = new AuthenticationProperties
+        {
+            IsPersistent = true,
+            AllowRefresh = true,
+            ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+        };
+
+        properties.StoreTokens(
+            new[]
             {
-                return Page();
-            }
+                new AuthenticationToken
+                {
+                    Name = "access_token",
+                    Value = response.Token
+                }
+            });
 
-            var response = await _authApiService.LoginAsync(LoginRequest);
+        await HttpContext.SignInAsync(
+            CookieAuthenticationDefaults.AuthenticationScheme,
+            new ClaimsPrincipal(identity),
+            properties);
 
-            if (response == null || !response.Success)
-            {
-                ModelState.AddModelError(
-                    string.Empty,
-                    response?.Message ?? "Invalid email or password, or the API is unavailable.");
-
-                return Page();
-            }
-
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.NameIdentifier, response.UserId.ToString()),
-                new(ClaimTypes.Name, $"{response.FirstName} {response.LastName}".Trim()),
-                new(ClaimTypes.Email, response.Email),
-                new(ClaimTypes.Role, response.Role)
-            };
-
-            var identity = new ClaimsIdentity(
-                claims,
-                CookieAuthenticationDefaults.AuthenticationScheme);
-
-            await HttpContext.SignInAsync(
-                CookieAuthenticationDefaults.AuthenticationScheme,
-                new ClaimsPrincipal(identity));
-
-            if (!string.IsNullOrEmpty(ReturnUrl) && Url.IsLocalUrl(ReturnUrl))
-            {
-                return LocalRedirect(ReturnUrl);
-            }
-
-            return RedirectToPage("/Admin/AdminDashboard");
+        if (!string.IsNullOrEmpty(ReturnUrl) &&
+            Url.IsLocalUrl(ReturnUrl))
+        {
+            return LocalRedirect(ReturnUrl);
         }
+
+        return RedirectToPage("/Admin/AdminDashboard");
     }
 }

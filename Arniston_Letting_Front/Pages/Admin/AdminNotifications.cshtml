@@ -2,145 +2,380 @@
 @model Arniston_Letting_Front.Pages.Admin.AdminNotificationsModel
 
 @{
-    ViewData["Title"] = "Notifications";
+ViewData["Title"] = "Notifications";
 }
 
 <div class="crud-page">
+<div class="crud-header">
 
-    <div class="crud-header">
+    <div>
         <div class="crud-title">Notifications</div>
-
-        <form method="get" class="crud-search">
-            <input type="text" name="Search" value="@Model.Search" placeholder="Search..." />
-            <button type="submit" class="btn btn-primary">Search</button>
-            @if (!string.IsNullOrWhiteSpace(Model.Search))
-            {
-                <a class="btn btn-muted" asp-page="/Admin/AdminNotifications">Clear</a>
-            }
-        </form>
+        <div class="crud-subtitle">Manage system notifications and delivery status</div>
     </div>
 
-    @if (!string.IsNullOrEmpty(Model.Message))
-    {
-        <div class="alert alert-success">@Model.Message</div>
-    }
+    <form method="get"
+          class="crud-search">
 
-    @if (!string.IsNullOrEmpty(Model.Error))
-    {
-        <div class="alert alert-error">@Model.Error</div>
-    }
+        <input type="text"
+               name="Search"
+               value="@Model.Search"
+               placeholder="Search notifications..." />
+
+        <button type="submit"
+                class="btn btn-primary">
+            Search
+        </button>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+            <a class="btn btn-muted"
+               asp-page="/Admin/AdminNotifications">
+                Clear
+            </a>
+        }
+
+    </form>
+
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-success">
+        @Model.Message
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-error">
+        @Model.Error
+    </div>
+}
+
+<div class="crud-card">
+
+    <div class="crud-card-header">
+
+        <div>
+            <h2>Notification List</h2>
+            <span>System notifications and current delivery status</span>
+        </div>
+
+    </div>
 
     <div class="crud-table-wrap">
+
         <table class="crud-table">
+
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th class="col-id">ID</th>
                     <th>Type</th>
                     <th>Recipient</th>
                     <th>Date</th>
                     <th>Time</th>
                     <th>Status</th>
-                    <th></th>
+                    <th class="col-actions">Actions</th>
                 </tr>
             </thead>
+
             <tbody>
+
                 @if (Model.Items.Any())
                 {
                     foreach (var item in Model.Items)
                     {
                         <tr class="@(Model.EditId == item.NotificationId ? "selected" : "")">
-                            <td>@(item.NotificationId)</td>
-                            <td>@(item.Type)</td>
-                            <td>@(item.Recipient)</td>
-                            <td>@(item.Date.ToString("yyyy-MM-dd"))</td>
-                            <td>@(item.Time.ToString(@"hh\:mm"))</td>
-                            <td>@(item.Status)</td>
-                            <td>
-                                <div class="crud-actions">
-                                    <a class="btn btn-small btn-primary" asp-page="/Admin/AdminNotifications" asp-route-EditId="@item.NotificationId" asp-route-Search="@Model.Search">Edit</a>
-                                    <form method="post" asp-page-handler="Delete" asp-route-id="@item.NotificationId" asp-route-Search="@Model.Search"
-                                          onsubmit="return confirm('Delete this notification?');">
-                                        <button type="submit" class="btn btn-small btn-danger">Delete</button>
-                                    </form>
-                                </div>
+
+                            <td class="booking-id">
+                                @item.NotificationId
                             </td>
+
+                            <td class="booking-property">
+                                @item.Type
+                            </td>
+
+                            <td>
+                                @item.Recipient
+                            </td>
+
+                            <td>
+                                @item.Date.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td>
+                                @item.Time.ToString(@"hh\:mm")
+                            </td>
+
+                            <td>
+
+                                @if (item.Status == "Sent")
+                                {
+                                    <span class="dashboard-status status-completed">
+                                        Sent
+                                    </span>
+                                }
+                                else if (item.Status == "Pending")
+                                {
+                                    <span class="dashboard-status status-pending">
+                                        Pending
+                                    </span>
+                                }
+                                else if (item.Status == "Failed")
+                                {
+                                    <span class="dashboard-status status-failed">
+                                        Failed
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="dashboard-status">
+                                        @item.Status
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td>
+
+                                <div class="crud-actions">
+
+                                    <a class="btn btn-small btn-primary"
+                                       asp-page="/Admin/AdminNotifications"
+                                       asp-route-EditId="@item.NotificationId"
+                                       asp-route-Search="@Model.Search">
+                                        Edit
+                                    </a>
+
+                                    <form method="post"
+                                          asp-page-handler="Delete"
+                                          asp-route-id="@item.NotificationId"
+                                          asp-route-Search="@Model.Search"
+                                          onsubmit="return confirm('Delete this notification?');">
+
+                                        <button type="submit"
+                                                class="btn btn-small btn-danger">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="7">No notifications found.</td>
+                        <td colspan="7"
+                            class="empty-state">
+                            No notifications found.
+                        </td>
                     </tr>
                 }
+
             </tbody>
+
         </table>
-    </div>
 
-    <div class="crud-panel">
-        <h2>@(Model.EditId.HasValue ? $"Edit notification #{Model.EditId}" : "Add new notification")</h2>
-
-        <form method="post" asp-page-handler="Save" asp-route-Search="@Model.Search">
-            <input type="hidden" name="EditId" value="@Model.EditId" />
-
-            <div asp-validation-summary="ModelOnly" class="field-error"></div>
-
-            <div class="crud-form">
-                <div class="crud-field">
-                    <label asp-for="Input.Type">Type</label>
-                    <select asp-for="Input.Type">
-                        <option value="">-- Select --</option>
-                        <option value="Booking">Booking</option>
-                        <option value="Cleaner Task">Cleaner Task</option>
-                        <option value="Breakage">Breakage</option>
-                        <option value="General">General</option>
-                    </select>
-                    <span asp-validation-for="Input.Type" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.Recipient">Recipient</label>
-                    <input asp-for="Input.Recipient" type="text" />
-                    <span asp-validation-for="Input.Recipient" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.Date">Date</label>
-                    <input asp-for="Input.Date" type="date" />
-                    <span asp-validation-for="Input.Date" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.Time">Time</label>
-                    <input asp-for="Input.Time" type="time" />
-                    <span asp-validation-for="Input.Time" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.Status">Status</label>
-                    <select asp-for="Input.Status">
-                        <option value="">-- Select --</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Sent">Sent</option>
-                        <option value="Failed">Failed</option>
-                    </select>
-                    <span asp-validation-for="Input.Status" class="field-error"></span>
-                </div>
-                <div class="crud-field wide">
-                    <label asp-for="Input.Message">Message</label>
-                    <textarea asp-for="Input.Message" rows="3"></textarea>
-                    <span asp-validation-for="Input.Message" class="field-error"></span>
-                </div>
-            </div>
-
-            <div class="crud-buttons">
-                <button type="submit" class="btn btn-primary">@(Model.EditId.HasValue ? "Update" : "Create")</button>
-                @if (Model.EditId.HasValue)
-                {
-                    <a class="btn btn-muted" asp-page="/Admin/AdminNotifications" asp-route-Search="@Model.Search">Cancel</a>
-                }
-            </div>
-        </form>
     </div>
 
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+<div class="crud-panel">
+
+    <div class="crud-panel-header">
+
+        <div>
+
+            <h2>
+                @(Model.EditId.HasValue
+                    ? $"Edit notification #{Model.EditId}"
+                    : "Add new notification")
+            </h2>
+
+            <span>
+                @(Model.EditId.HasValue
+                    ? "Update the notification information below"
+                    : "Create a new system notification")
+            </span>
+
+        </div>
+
+    </div>
+
+    <form method="post"
+          asp-page-handler="Save"
+          asp-route-Search="@Model.Search">
+
+        <input type="hidden"
+               name="EditId"
+               value="@Model.EditId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="field-error">
+        </div>
+
+        <div class="crud-form">
+
+            <div class="crud-field">
+
+                <label asp-for="Input.Type">
+                    Notification type
+                </label>
+
+                <select asp-for="Input.Type">
+
+                    <option value="">
+                        -- Select notification type --
+                    </option>
+
+                    <option value="Booking">
+                        Booking
+                    </option>
+
+                    <option value="Cleaner Task">
+                        Cleaner Task
+                    </option>
+
+                    <option value="Breakage">
+                        Breakage
+                    </option>
+
+                    <option value="General">
+                        General
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="Input.Type"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.Recipient">
+                    Recipient
+                </label>
+
+                <input asp-for="Input.Recipient"
+                       type="text"
+                       placeholder="Enter recipient" />
+
+                <span asp-validation-for="Input.Recipient"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.Date">
+                    Date
+                </label>
+
+                <input asp-for="Input.Date"
+                       type="date" />
+
+                <span asp-validation-for="Input.Date"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.Time">
+                    Time
+                </label>
+
+                <input asp-for="Input.Time"
+                       type="time" />
+
+                <span asp-validation-for="Input.Time"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.Status">
+                    Status
+                </label>
+
+                <select asp-for="Input.Status">
+
+                    <option value="">
+                        -- Select status --
+                    </option>
+
+                    <option value="Pending">
+                        Pending
+                    </option>
+
+                    <option value="Sent">
+                        Sent
+                    </option>
+
+                    <option value="Failed">
+                        Failed
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="Input.Status"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field wide">
+
+                <label asp-for="Input.Message">
+                    Message
+                </label>
+
+                <textarea asp-for="Input.Message"
+                          rows="4"
+                          placeholder="Enter notification message"></textarea>
+
+                <span asp-validation-for="Input.Message"
+                      class="field-error">
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="crud-buttons">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                @(Model.EditId.HasValue ? "Update Notification" : "Create Notification")
+            </button>
+
+            @if (Model.EditId.HasValue)
+            {
+                <a class="btn btn-muted"
+                   asp-page="/Admin/AdminNotifications"
+                   asp-route-Search="@Model.Search">
+                    Cancel
+                </a>
+            }
+
+        </div>
+
+    </form>
+
+</div>
+
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" />
 }

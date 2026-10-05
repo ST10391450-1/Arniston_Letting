@@ -1,6 +1,7 @@
 ﻿using Arniston_Letting_API.Data;
 using Arniston_Letting_API.DTOs.Tasks;
 using Arniston_Letting_API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace Arniston_Letting_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class TasksController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -21,8 +23,7 @@ public class TasksController : ControllerBase
     public async Task<ActionResult<IEnumerable<CleanerTaskDto>>> GetTasks()
     {
         var tasks = await _context.CleanerTasks
-            .Include(t => t.Cleaner)
-            .Include(t => t.Location)
+            .AsNoTracking()
             .Select(t => new CleanerTaskDto
             {
                 CleanerTaskId = t.CleanerTaskId,
@@ -50,8 +51,7 @@ public class TasksController : ControllerBase
     public async Task<ActionResult<CleanerTaskDto>> GetTask(int id)
     {
         var task = await _context.CleanerTasks
-            .Include(t => t.Cleaner)
-            .Include(t => t.Location)
+            .AsNoTracking()
             .Where(t => t.CleanerTaskId == id)
             .Select(t => new CleanerTaskDto
             {
@@ -87,6 +87,7 @@ public class TasksController : ControllerBase
         int cleanerId)
     {
         var cleanerExists = await _context.Cleaners
+            .AsNoTracking()
             .AnyAsync(c => c.CleanerId == cleanerId);
 
         if (!cleanerExists)
@@ -98,8 +99,7 @@ public class TasksController : ControllerBase
         }
 
         var tasks = await _context.CleanerTasks
-            .Include(t => t.Cleaner)
-            .Include(t => t.Location)
+            .AsNoTracking()
             .Where(t => t.CleanerId == cleanerId)
             .Select(t => new CleanerTaskDto
             {
@@ -134,6 +134,7 @@ public class TasksController : ControllerBase
         }
 
         var cleanerExists = await _context.Cleaners
+            .AsNoTracking()
             .AnyAsync(c => c.CleanerId == request.CleanerId);
 
         if (!cleanerExists)
@@ -145,6 +146,7 @@ public class TasksController : ControllerBase
         }
 
         var locationExists = await _context.Properties
+            .AsNoTracking()
             .AnyAsync(p => p.PropertyId == request.LocationId);
 
         if (!locationExists)
@@ -155,6 +157,8 @@ public class TasksController : ControllerBase
             });
         }
 
+        var notes = request.Notes?.Trim();
+
         var cleanerTask = new CleanerTask
         {
             CleanerId = request.CleanerId,
@@ -162,7 +166,7 @@ public class TasksController : ControllerBase
             Date = request.Date,
             Time = request.Time,
             Completed = request.Completed,
-            Notes = request.Notes
+            Notes = notes
         };
 
         _context.CleanerTasks.Add(cleanerTask);
@@ -170,8 +174,7 @@ public class TasksController : ControllerBase
         await _context.SaveChangesAsync();
 
         var result = await _context.CleanerTasks
-            .Include(t => t.Cleaner)
-            .Include(t => t.Location)
+            .AsNoTracking()
             .Where(t => t.CleanerTaskId == cleanerTask.CleanerTaskId)
             .Select(t => new CleanerTaskDto
             {
@@ -219,6 +222,7 @@ public class TasksController : ControllerBase
         }
 
         var cleanerExists = await _context.Cleaners
+            .AsNoTracking()
             .AnyAsync(c => c.CleanerId == request.CleanerId);
 
         if (!cleanerExists)
@@ -230,6 +234,7 @@ public class TasksController : ControllerBase
         }
 
         var locationExists = await _context.Properties
+            .AsNoTracking()
             .AnyAsync(p => p.PropertyId == request.LocationId);
 
         if (!locationExists)
@@ -245,7 +250,7 @@ public class TasksController : ControllerBase
         cleanerTask.Date = request.Date;
         cleanerTask.Time = request.Time;
         cleanerTask.Completed = request.Completed;
-        cleanerTask.Notes = request.Notes;
+        cleanerTask.Notes = request.Notes?.Trim();
 
         await _context.SaveChangesAsync();
 

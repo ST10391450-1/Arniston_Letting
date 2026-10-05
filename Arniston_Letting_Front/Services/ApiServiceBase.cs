@@ -9,7 +9,9 @@ public abstract class ApiServiceBase<TDto, TCreate, TUpdate>
     protected readonly HttpClient Http;
     private readonly string _route;
 
-    protected ApiServiceBase(HttpClient http, string route)
+    protected ApiServiceBase(
+        HttpClient http,
+        string route)
     {
         Http = http;
         _route = route;
@@ -19,7 +21,21 @@ public abstract class ApiServiceBase<TDto, TCreate, TUpdate>
     {
         try
         {
-            return await Http.GetFromJsonAsync<IEnumerable<TDto>>(_route)
+            var response = await Http.GetAsync(_route);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized ||
+                response.StatusCode == HttpStatusCode.Forbidden)
+            {
+                return Enumerable.Empty<TDto>();
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return Enumerable.Empty<TDto>();
+            }
+
+            return await response.Content
+                       .ReadFromJsonAsync<IEnumerable<TDto>>()
                    ?? Enumerable.Empty<TDto>();
         }
         catch (HttpRequestException)
@@ -32,29 +48,22 @@ public abstract class ApiServiceBase<TDto, TCreate, TUpdate>
     {
         try
         {
-            var response = await Http.GetAsync($"{_route}/{id}");
-            if (response.StatusCode == HttpStatusCode.NotFound || !response.IsSuccessStatusCode)
+            var response = await Http.GetAsync(
+                $"{_route}/{id}");
+
+            if (response.StatusCode ==
+                HttpStatusCode.NotFound)
             {
                 return null;
             }
-            return await response.Content.ReadFromJsonAsync<TDto>();
-        }
-        catch (HttpRequestException)
-        {
-            return null;
-        }
-    }
 
-    public virtual async Task<TDto?> CreateAsync(TCreate request)
-    {
-        try
-        {
-            var response = await Http.PostAsJsonAsync(_route, request);
             if (!response.IsSuccessStatusCode)
             {
                 return null;
             }
-            return await response.Content.ReadFromJsonAsync<TDto>();
+
+            return await response.Content
+                .ReadFromJsonAsync<TDto>();
         }
         catch (HttpRequestException)
         {
@@ -62,11 +71,39 @@ public abstract class ApiServiceBase<TDto, TCreate, TUpdate>
         }
     }
 
-    public virtual async Task<bool> UpdateAsync(int id, TUpdate request)
+    public virtual async Task<TDto?> CreateAsync(
+        TCreate request)
     {
         try
         {
-            var response = await Http.PutAsJsonAsync($"{_route}/{id}", request);
+            var response = await Http.PostAsJsonAsync(
+                _route,
+                request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            return await response.Content
+                .ReadFromJsonAsync<TDto>();
+        }
+        catch (HttpRequestException)
+        {
+            return null;
+        }
+    }
+
+    public virtual async Task<bool> UpdateAsync(
+        int id,
+        TUpdate request)
+    {
+        try
+        {
+            var response = await Http.PutAsJsonAsync(
+                $"{_route}/{id}",
+                request);
+
             return response.IsSuccessStatusCode;
         }
         catch (HttpRequestException)
@@ -79,7 +116,9 @@ public abstract class ApiServiceBase<TDto, TCreate, TUpdate>
     {
         try
         {
-            var response = await Http.DeleteAsync($"{_route}/{id}");
+            var response = await Http.DeleteAsync(
+                $"{_route}/{id}");
+
             return response.IsSuccessStatusCode;
         }
         catch (HttpRequestException)

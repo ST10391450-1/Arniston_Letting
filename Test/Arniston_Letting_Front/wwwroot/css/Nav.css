@@ -1,0 +1,253 @@
+﻿.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    border-bottom: 1px solid #BFBFBF;
+    z-index: 1000;
+    box-sizing: border-box;
+}
+
+.brand {
+    width: 250px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 22px;
+    border-right: 1px solid #BFBFBF;
+    box-sizing: border-box;
+}
+
+.brand-logo {
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+    .brand-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+.brand-name {
+    color: #000000;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.header-title {
+    flex: 1;
+    padding: 0 28px;
+    color: #000000;
+    font-size: 21px;
+    font-weight: 700;
+}
+
+.header-right {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding-right: 24px;
+}
+
+.return-admin {
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid #02BEA0;
+    border-radius: 7px;
+    color: #02BEA0;
+    background: #FFFFFF;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.15s ease;
+}
+
+    .return-admin:hover {
+        background: #02BEA0;
+        color: #FFFFFF;
+    }
+
+.header-date {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    min-width: 100px;
+}
+
+    .header-date strong {
+        color: #8E8E93;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .header-date span {
+        color: #000000;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+.sidebar {
+    position: fixed;
+    top: 72px;
+    left: 0;
+    bottom: 0;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    background: #4D4D4D;
+    border-right: 1px solid #BFBFBF;
+    z-index: 999;
+    box-sizing: border-box;
+}
+
+.main-navigation {
+    display: flex;
+    flex-direction: column;
+    padding: 16px 12px;
+    gap: 5px;
+}
+
+.nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 7px;
+    color: #FFFFFF;
+    background: transparent;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    box-sizing: border-box;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+    .nav-item:hover {
+        background: #404040;
+        color: #FFFFFF;
+    }
+
+    .nav-item.active {
+        background: #02BEA0;
+        color: #FFFFFF;
+    }
+
+        .nav-item.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 8px;
+            bottom: 8px;
+            width: 4px;
+            border-radius: 0 3px 3px 0;
+            background: #FFFFFF;
+        }
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 14px 12px;
+    border-top: 1px solid #BFBFBF;
+}
+
+    .sidebar-bottom form {
+        margin: 0;
+    }
+
+.logout-button {
+    width: 100%;
+    height: 42px;
+    border: 0;
+    border-radius: 7px;
+    background: #FF383C;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.15s ease;
+}
+
+    .logout-button:hover {
+        background: #FF383C;
+    }
+
+.page-content {
+    margin-left: 250px;
+    padding-top: 72px;
+    min-height: 100vh;
+    box-sizing: border-box;
+    background: #D9D9D9;
+}
+
+@media (max-width: 900px) {
+
+    .brand {
+        width: 210px;
+    }
+
+    .sidebar {
+        width: 210px;
+    }
+
+    .page-content {
+        margin-left: 210px;
+    }
+
+    .header-title {
+        padding: 0 18px;
+    }
+
+    .header-date {
+        display: none;
+    }
+}
+
+@media (max-width: 650px) {
+
+    .brand {
+        width: auto;
+        border-right: 0;
+    }
+
+    .brand-name {
+        display: none;
+    }
+
+    .header-title {
+        padding: 0 12px;
+        font-size: 18px;
+    }
+
+    .header-right {
+        padding-right: 12px;
+    }
+
+    .return-admin {
+        padding: 0 10px;
+        font-size: 11px;
+    }
+
+    .sidebar {
+        width: 190px;
+    }
+
+    .page-content {
+        margin-left: 190px;
+    }
+}

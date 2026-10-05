@@ -1,0 +1,91 @@
+﻿<link rel="stylesheet"
+      href="~/css/nav.css"
+      asp-append-version="true" />
+
+<header class="site-header">
+
+<div class="brand-logo">
+    <img src="~/Assests/icon.png"
+         alt="Arniston Holiday Letting" />
+</div>
+
+<div class="header-title">
+    @ViewData["Title"]
+</div>
+
+<div class="header-right">
+
+    @if (ViewData["Title"]?.ToString() != "Admin Dashboard" &&
+         ViewData["NoNav"]?.ToString() != "true")
+    {
+        <a href="/AdminDashboard" class="return-admin">
+            Return To Admin
+        </a>
+    }
+
+    <div class="header-date">
+        <strong>Today's Date</strong>
+        <span>@DateTime.Now.ToString("dd/MM/yyyy")</span>
+    </div>
+
+</div>
+
+
+</header>
+
+<aside class="sidebar">
+
+<nav class="main-navigation" aria-label="Main navigation">
+
+    <a href="/AdminBookings"
+       class="nav-item @(Context.Request.Path == "/AdminBookings" ? "active" : "")">
+        <span>Bookings</span>
+    </a>
+
+    <a href="/AdminProperties"
+       class="nav-item @(Context.Request.Path == "/AdminProperties" ? "active" : "")">
+        <span>Properties</span>
+    </a>
+
+    <a href="/AdminOwners"
+       class="nav-item @(Context.Request.Path == "/AdminOwners" ? "active" : "")">
+        <span>Owners</span>
+    </a>
+
+    <a href="/AdminCleaner"
+       class="nav-item @(Context.Request.Path == "/AdminCleaner" ? "active" : "")">
+        <span>Cleaners</span>
+    </a>
+
+    <a href="/AdminTasks"
+       class="nav-item @(Context.Request.Path == "/AdminTasks" ? "active" : "")">
+        <span>Tasks</span>
+    </a>
+
+    <a href="/AdminBreakages"
+       class="nav-item @(Context.Request.Path == "/AdminBreakages" ? "active" : "")">
+        <span>Breakages</span>
+    </a>
+
+    <a href="/AdminNotifications"
+       class="nav-item @(Context.Request.Path == "/AdminNotifications" ? "active" : "")">
+        <span>Notifications</span>
+    </a>
+
+    <a href="/AdminReports"
+       class="nav-item @(Context.Request.Path == "/AdminReports" ? "active" : "")">
+        <span>Reports</span>
+    </a>
+
+</nav>
+
+<div class="sidebar-bottom">
+
+    <form method="post" asp-page="/Logout">
+        <button type="submit" class="logout-button">
+            LOG OUT
+        </button>
+    </form>
+
+</div>
+</aside>

@@ -1,6 +1,7 @@
 ﻿using Arniston_Letting_API.Data;
 using Arniston_Letting_API.DTOs.Properties;
 using Arniston_Letting_API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace Arniston_Letting_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class PropertiesController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -21,7 +23,7 @@ public class PropertiesController : ControllerBase
     public async Task<ActionResult<IEnumerable<PropertyDto>>> GetProperties()
     {
         var properties = await _context.Properties
-            .Include(p => p.Owner)
+            .AsNoTracking()
             .Select(p => new PropertyDto
             {
                 PropertyId = p.PropertyId,
@@ -50,7 +52,7 @@ public class PropertiesController : ControllerBase
     public async Task<ActionResult<PropertyDto>> GetProperty(int id)
     {
         var property = await _context.Properties
-            .Include(p => p.Owner)
+            .AsNoTracking()
             .Where(p => p.PropertyId == id)
             .Select(p => new PropertyDto
             {
@@ -92,7 +94,28 @@ public class PropertiesController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        var propertyName = request.PropertyName?.Trim();
+        var address = request.Address?.Trim();
+        var description = request.Description?.Trim();
+
+        if (string.IsNullOrWhiteSpace(propertyName))
+        {
+            return BadRequest(new
+            {
+                message = "Property name is required."
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            return BadRequest(new
+            {
+                message = "Property address is required."
+            });
+        }
+
         var ownerExists = await _context.Owners
+            .AsNoTracking()
             .AnyAsync(o => o.OwnerId == request.OwnerId);
 
         if (!ownerExists)
@@ -105,15 +128,15 @@ public class PropertiesController : ControllerBase
 
         var property = new Property
         {
-            PropertyName = request.PropertyName,
-            Address = request.Address,
+            PropertyName = propertyName,
+            Address = address,
             Occupied = request.Occupied,
             OccupiedUntil = request.OccupiedUntil,
             OwnerId = request.OwnerId,
             Bedrooms = request.Bedrooms,
             Sleeps = request.Sleeps,
             RatePerNight = request.RatePerNight,
-            Description = request.Description,
+            Description = description,
             Parking = request.Parking,
             Pool = request.Pool
         };
@@ -123,7 +146,7 @@ public class PropertiesController : ControllerBase
         await _context.SaveChangesAsync();
 
         var result = await _context.Properties
-            .Include(p => p.Owner)
+            .AsNoTracking()
             .Where(p => p.PropertyId == property.PropertyId)
             .Select(p => new PropertyDto
             {
@@ -172,7 +195,28 @@ public class PropertiesController : ControllerBase
             });
         }
 
+        var propertyName = request.PropertyName?.Trim();
+        var address = request.Address?.Trim();
+        var description = request.Description?.Trim();
+
+        if (string.IsNullOrWhiteSpace(propertyName))
+        {
+            return BadRequest(new
+            {
+                message = "Property name is required."
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(address))
+        {
+            return BadRequest(new
+            {
+                message = "Property address is required."
+            });
+        }
+
         var ownerExists = await _context.Owners
+            .AsNoTracking()
             .AnyAsync(o => o.OwnerId == request.OwnerId);
 
         if (!ownerExists)
@@ -183,15 +227,15 @@ public class PropertiesController : ControllerBase
             });
         }
 
-        property.PropertyName = request.PropertyName;
-        property.Address = request.Address;
+        property.PropertyName = propertyName;
+        property.Address = address;
         property.Occupied = request.Occupied;
         property.OccupiedUntil = request.OccupiedUntil;
         property.OwnerId = request.OwnerId;
         property.Bedrooms = request.Bedrooms;
         property.Sleeps = request.Sleeps;
         property.RatePerNight = request.RatePerNight;
-        property.Description = request.Description;
+        property.Description = description;
         property.Parking = request.Parking;
         property.Pool = request.Pool;
 
@@ -215,6 +259,7 @@ public class PropertiesController : ControllerBase
         }
 
         var hasBookings = await _context.Bookings
+            .AsNoTracking()
             .AnyAsync(b => b.PropertyId == id);
 
         if (hasBookings)
@@ -226,6 +271,7 @@ public class PropertiesController : ControllerBase
         }
 
         var hasCleanerTasks = await _context.CleanerTasks
+            .AsNoTracking()
             .AnyAsync(t => t.LocationId == id);
 
         if (hasCleanerTasks)
@@ -237,6 +283,7 @@ public class PropertiesController : ControllerBase
         }
 
         var hasBreakages = await _context.Breakages
+            .AsNoTracking()
             .AnyAsync(b => b.LocationId == id);
 
         if (hasBreakages)

@@ -1,0 +1,310 @@
+﻿@page "/AdminBookings"
+@model Arniston_Letting_Front.Pages.Admin.AdminBookingsModel
+
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<div class="crud-page">
+
+    <div class="crud-header">
+
+        <div>
+            <div class="crud-title">Bookings</div>
+            <div class="crud-subtitle">Manage property bookings and reservations</div>
+        </div>
+
+        <form method="get" class="crud-search">
+
+            <input type="text"
+                   name="Search"
+                   value="@Model.Search"
+                   placeholder="Search bookings..." />
+
+            <button type="submit"
+                    class="btn btn-primary">
+                Search
+            </button>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Search))
+            {
+                <a class="btn btn-muted"
+                   asp-page="/Admin/AdminBookings">
+                    Clear
+                </a>
+            }
+
+        </form>
+
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-success">
+            @Model.Message
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="alert alert-error">
+            @Model.Error
+        </div>
+    }
+
+    <div class="crud-card">
+
+        <div class="crud-card-header">
+
+            <div>
+                <h2>Booking List</h2>
+                <span>Current property reservations</span>
+            </div>
+
+        </div>
+
+        <div class="crud-table-wrap">
+
+            <table class="crud-table">
+
+                <thead>
+                    <tr>
+                        <th class="col-id">ID</th>
+                        <th>Property</th>
+                        <th>Booker</th>
+                        <th>Check in</th>
+                        <th>Check out</th>
+                        <th class="col-rate">Rate</th>
+                        <th class="col-actions">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Items.Any())
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr class="@(Model.EditId == item.BookingId ? "selected" : "")">
+
+                                <td class="booking-id">
+                                    @item.BookingId
+                                </td>
+
+                                <td class="booking-property">
+                                    @item.PropertyName
+                                </td>
+
+                                <td>
+                                    @item.BookerName
+                                </td>
+
+                                <td>
+                                    @item.CheckIn.ToString("dd MMM yyyy")
+                                </td>
+
+                                <td>
+                                    @item.CheckOut.ToString("dd MMM yyyy")
+                                </td>
+
+                                <td class="booking-rate">
+                                    R @item.Rate.ToString("N2")
+                                </td>
+
+                                <td>
+
+                                    <div class="crud-actions">
+
+                                        <a class="btn btn-small btn-primary"
+                                           asp-page="/Admin/AdminBookings"
+                                           asp-route-EditId="@item.BookingId"
+                                           asp-route-Search="@Model.Search">
+                                            Edit
+                                        </a>
+
+                                        <form method="post"
+                                              asp-page-handler="Delete"
+                                              asp-route-id="@item.BookingId"
+                                              asp-route-Search="@Model.Search"
+                                              onsubmit="return confirm('Delete this booking?');">
+
+                                            <button type="submit"
+                                                    class="btn btn-small btn-danger">
+                                                Delete
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7"
+                                class="empty-state">
+                                No bookings found.
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <div class="crud-panel">
+
+        <div class="crud-panel-header">
+
+            <div>
+                <h2>
+                    @(Model.EditId.HasValue
+                        ? $"Edit booking #{Model.EditId}"
+                        : "Add new booking")
+                </h2>
+
+                <span>
+                    @(Model.EditId.HasValue
+                        ? "Update the booking details below"
+                        : "Enter the details for the new booking")
+                </span>
+            </div>
+
+        </div>
+
+        <form method="post"
+              asp-page-handler="Save"
+              asp-route-Search="@Model.Search">
+
+            <input type="hidden"
+                   name="EditId"
+                   value="@Model.EditId" />
+
+            <div asp-validation-summary="ModelOnly"
+                 class="field-error">
+            </div>
+
+            <div class="crud-form">
+
+                <div class="crud-field">
+
+                    <label asp-for="Input.PropertyId">
+                        Property
+                    </label>
+
+                    <select asp-for="Input.PropertyId"
+                            asp-items="Model.PropertyOptions">
+
+                        <option value="">
+                            -- Select property --
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="Input.PropertyId"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+                <div class="crud-field">
+
+                    <label asp-for="Input.BookerName">
+                        Booker name
+                    </label>
+
+                    <input asp-for="Input.BookerName"
+                           type="text"
+                           placeholder="Enter booker name" />
+
+                    <span asp-validation-for="Input.BookerName"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+                <div class="crud-field">
+
+                    <label asp-for="Input.CheckIn">
+                        Check in
+                    </label>
+
+                    <input asp-for="Input.CheckIn"
+                           type="date" />
+
+                    <span asp-validation-for="Input.CheckIn"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+                <div class="crud-field">
+
+                    <label asp-for="Input.CheckOut">
+                        Check out
+                    </label>
+
+                    <input asp-for="Input.CheckOut"
+                           type="date" />
+
+                    <span asp-validation-for="Input.CheckOut"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+                <div class="crud-field">
+
+                    <label asp-for="Input.Rate">
+                        Rate (R)
+                    </label>
+
+                    <input asp-for="Input.Rate"
+                           type="number"
+                           step="0.01"
+                           min="0"
+                           placeholder="0.00" />
+
+                    <span asp-validation-for="Input.Rate"
+                          class="field-error">
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="crud-buttons">
+
+                <button type="submit"
+                        class="btn btn-primary">
+                    @(Model.EditId.HasValue ? "Update Booking" : "Create Booking")
+                </button>
+
+                @if (Model.EditId.HasValue)
+                {
+                    <a class="btn btn-muted"
+                       asp-page="/Admin/AdminBookings"
+                       asp-route-Search="@Model.Search">
+                        Cancel
+                    </a>
+                }
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

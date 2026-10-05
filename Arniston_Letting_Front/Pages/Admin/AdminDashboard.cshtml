@@ -2,116 +2,315 @@
 @model Arniston_Letting_Front.Pages.Admin.AdminDashboardModel
 
 @{
-    ViewData["Title"] = "Admin Dashboard";
+ViewData["Title"] = "Admin Dashboard";
 }
 
-<div class="crud-page">
-
-    @if (!Model.ApiAvailable)
-    {
-        <div class="alert alert-error">
-            Could not reach the Arniston Letting API. Make sure the API project is running
+<div class="dashboard-page">
+@if (!Model.ApiAvailable)
+{
+    <div class="dashboard-alert">
+        <div class="dashboard-alert-title">API Connection Error</div>
+        <div class="dashboard-alert-text">
+            The Arniston Letting API could not be reached. Check that the API is running
             and that <code>ApiSettings:BaseUrl</code> in appsettings.json is correct.
         </div>
-    }
+    </div>
+}
 
-    <div class="stat-grid">
-        <div class="stat-card"><span>Total bookings</span><strong>@Model.Dashboard.TotalBookings</strong></div>
-        <div class="stat-card"><span>Properties</span><strong>@Model.Dashboard.TotalProperties</strong></div>
-        <div class="stat-card"><span>Owners</span><strong>@Model.Dashboard.TotalOwners</strong></div>
-        <div class="stat-card"><span>Cleaners</span><strong>@Model.Dashboard.TotalCleaners</strong></div>
-        <div class="stat-card"><span>Pending tasks</span><strong>@Model.Dashboard.PendingTasks</strong></div>
-        <div class="stat-card"><span>Open breakages</span><strong>@Model.Dashboard.OpenBreakages</strong></div>
-        <div class="stat-card"><span>Pending notifications</span><strong>@Model.Dashboard.PendingNotifications</strong></div>
+<div class="dashboard-header">
+
+    <div>
+        <h1>Admin Dashboard</h1>
+        <p>Property management overview and current activity</p>
     </div>
 
-    <div class="crud-panel" style="margin-bottom:20px">
-        <h2>Nearest confirmed bookings</h2>
-        <div class="crud-table-wrap" style="margin:0">
-            <table class="crud-table">
-                <thead>
-                    <tr><th>Accommodation</th><th>Booker</th><th>Check in</th><th>Check out</th><th>Rate</th></tr>
-                </thead>
-                <tbody>
-                    @if (Model.UpcomingBookings.Any())
+    <div class="dashboard-date">
+        <span>Today</span>
+        <strong>@DateTime.Now.ToString("dd MMMM yyyy")</strong>
+    </div>
+
+</div>
+
+<section class="dashboard-stats">
+
+    <div class="dashboard-stat">
+        <div class="stat-label">Total bookings</div>
+        <div class="stat-value">@Model.Dashboard.TotalBookings</div>
+        <div class="stat-description">All reservations</div>
+    </div>
+
+    <div class="dashboard-stat">
+        <div class="stat-label">Properties</div>
+        <div class="stat-value">@Model.Dashboard.TotalProperties</div>
+        <div class="stat-description">Managed properties</div>
+    </div>
+
+    <div class="dashboard-stat">
+        <div class="stat-label">Owners</div>
+        <div class="stat-value">@Model.Dashboard.TotalOwners</div>
+        <div class="stat-description">Property owners</div>
+    </div>
+
+    <div class="dashboard-stat">
+        <div class="stat-label">Cleaners</div>
+        <div class="stat-value">@Model.Dashboard.TotalCleaners</div>
+        <div class="stat-description">Available staff</div>
+    </div>
+
+    <div class="dashboard-stat stat-warning">
+        <div class="stat-label">Pending tasks</div>
+        <div class="stat-value">@Model.Dashboard.PendingTasks</div>
+        <div class="stat-description">Require attention</div>
+    </div>
+
+    <div class="dashboard-stat stat-danger">
+        <div class="stat-label">Open breakages</div>
+        <div class="stat-value">@Model.Dashboard.OpenBreakages</div>
+        <div class="stat-description">Awaiting resolution</div>
+    </div>
+
+    <div class="dashboard-stat stat-notification">
+        <div class="stat-label">Notifications</div>
+        <div class="stat-value">@Model.Dashboard.PendingNotifications</div>
+        <div class="stat-description">Pending notifications</div>
+    </div>
+
+</section>
+
+<section class="dashboard-section">
+
+    <div class="dashboard-section-header">
+        <div>
+            <h2>Upcoming bookings</h2>
+            <p>Nearest confirmed reservations</p>
+        </div>
+
+        <a href="/AdminBookings"
+           class="dashboard-link">
+            View bookings
+        </a>
+    </div>
+
+    <div class="dashboard-table-wrap">
+
+        <table class="dashboard-table">
+
+            <thead>
+                <tr>
+                    <th>Accommodation</th>
+                    <th>Booker</th>
+                    <th>Check in</th>
+                    <th>Check out</th>
+                    <th>Rate</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (Model.UpcomingBookings.Any())
+                {
+                    foreach (var booking in Model.UpcomingBookings)
                     {
-                        foreach (var booking in Model.UpcomingBookings)
+                        <tr>
+
+                            <td class="dashboard-primary">
+                                @booking.PropertyName
+                            </td>
+
+                            <td>
+                                @booking.BookerName
+                            </td>
+
+                            <td>
+                                @booking.CheckIn.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td>
+                                @booking.CheckOut.ToString("dd MMM yyyy")
+                            </td>
+
+                            <td class="dashboard-rate">
+                                R @booking.Rate.ToString("N2")
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5"
+                            class="dashboard-empty">
+                            No upcoming confirmed bookings.
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</section>
+
+<section class="dashboard-columns">
+
+    <div class="dashboard-section">
+
+        <div class="dashboard-section-header">
+
+            <div>
+                <h2>Open breakages</h2>
+                <p>Items requiring attention</p>
+            </div>
+
+            <a href="/AdminBreakages"
+               class="dashboard-link">
+                View all
+            </a>
+
+        </div>
+
+        <div class="dashboard-table-wrap">
+
+            <table class="dashboard-table">
+
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Reported by</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.OpenBreakages.Any())
+                    {
+                        foreach (var breakage in Model.OpenBreakages)
                         {
                             <tr>
-                                <td>@booking.PropertyName</td>
-                                <td>@booking.BookerName</td>
-                                <td>@booking.CheckIn.ToString("yyyy-MM-dd")</td>
-                                <td>@booking.CheckOut.ToString("yyyy-MM-dd")</td>
-                                <td>@("R" + booking.Rate.ToString("N2"))</td>
+
+                                <td class="dashboard-primary">
+                                    @breakage.LocationName
+                                </td>
+
+                                <td>
+                                    @breakage.ReportedBy
+                                </td>
+
+                                <td>
+                                    @breakage.Date.ToString("dd MMM yyyy")
+                                </td>
+
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr><td colspan="5">No upcoming confirmed bookings.</td></tr>
+                        <tr>
+                            <td colspan="3"
+                                class="dashboard-empty">
+                                No open breakages.
+                            </td>
+                        </tr>
                     }
+
                 </tbody>
+
             </table>
+
         </div>
+
     </div>
 
-    <div class="crud-grid-2">
-        <div class="crud-panel">
-            <h2>Open breakages</h2>
-            <div class="crud-table-wrap" style="margin:0">
-                <table class="crud-table">
-                    <thead><tr><th>Location</th><th>Reported by</th><th>Date</th></tr></thead>
-                    <tbody>
-                        @if (Model.OpenBreakages.Any())
-                        {
-                            foreach (var breakage in Model.OpenBreakages)
-                            {
-                                <tr>
-                                    <td>@breakage.LocationName</td>
-                                    <td>@breakage.ReportedBy</td>
-                                    <td>@breakage.Date.ToString("yyyy-MM-dd")</td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr><td colspan="3">No open breakages.</td></tr>
-                        }
-                    </tbody>
-                </table>
+    <div class="dashboard-section">
+
+        <div class="dashboard-section-header">
+
+            <div>
+                <h2>Today's cleaning</h2>
+                <p>Scheduled cleaning activity</p>
             </div>
+
+            <a href="/AdminTasks"
+               class="dashboard-link">
+                View tasks
+            </a>
+
         </div>
 
-        <div class="crud-panel">
-            <h2>Houses to be cleaned today</h2>
-            <div class="crud-table-wrap" style="margin:0">
-                <table class="crud-table">
-                    <thead><tr><th>Location</th><th>Cleaner</th><th>Time</th><th>Status</th></tr></thead>
-                    <tbody>
-                        @if (Model.TodaysCleanings.Any())
+        <div class="dashboard-table-wrap">
+
+            <table class="dashboard-table">
+
+                <thead>
+                    <tr>
+                        <th>Location</th>
+                        <th>Cleaner</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.TodaysCleanings.Any())
+                    {
+                        foreach (var task in Model.TodaysCleanings)
                         {
-                            foreach (var task in Model.TodaysCleanings)
-                            {
-                                <tr>
-                                    <td>@task.LocationName</td>
-                                    <td>@task.CleanerName</td>
-                                    <td>@(task.Time.ToString(@"hh\:mm"))</td>
-                                    <td>
-                                        <span class="badge @(task.Completed ? "badge-green" : "badge-amber")">
-                                            @(task.Completed ? "Completed" : "Pending")
+                            <tr>
+
+                                <td class="dashboard-primary">
+                                    @task.LocationName
+                                </td>
+
+                                <td>
+                                    @task.CleanerName
+                                </td>
+
+                                <td>
+                                    @task.Time.ToString(@"hh\:mm")
+                                </td>
+
+                                <td>
+
+                                    @if (task.Completed)
+                                    {
+                                        <span class="dashboard-status status-completed">
+                                            Completed
                                         </span>
-                                    </td>
-                                </tr>
-                            }
+                                    }
+                                    else
+                                    {
+                                        <span class="dashboard-status status-pending">
+                                            Pending
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
                         }
-                        else
-                        {
-                            <tr><td colspan="4">No cleaning tasks for today.</td></tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4"
+                                class="dashboard-empty">
+                                No cleaning tasks for today.
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
         </div>
+
     </div>
 
+</section>
 </div>

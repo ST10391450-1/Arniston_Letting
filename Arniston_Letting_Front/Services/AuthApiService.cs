@@ -13,7 +13,8 @@ public class AuthApiService : IAuthApiService
         _httpClient = httpClient;
     }
 
-    public async Task<LoginResponse?> LoginAsync(LoginRequest request)
+    public async Task<LoginResponse?> LoginAsync(
+        LoginRequest request)
     {
         var response = await _httpClient.PostAsJsonAsync(
             "api/Auth/login",
@@ -24,7 +25,8 @@ public class AuthApiService : IAuthApiService
             return null;
         }
 
-        return await response.Content.ReadFromJsonAsync<LoginResponse>();
+        return await response.Content
+            .ReadFromJsonAsync<LoginResponse>();
     }
 
     public async Task<bool> LogoutAsync(int userId)

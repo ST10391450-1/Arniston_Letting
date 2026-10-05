@@ -12,15 +12,30 @@
           asp-append-version="true" />
 }
 
-<div class="login-container">
+<div class="login-page">
 
     <div class="login-card">
 
-        <h1>Login</h1>
+        <div class="login-brand">
+            <div class="brand-logo">
+                <img src="~/Assests/icon.png" alt="Arniston Holiday Letting" />
+            </div>
+
+            <div class="login-brand-name">
+                Arniston Holiday Letting
+            </div>
+        </div>
+
+        <div class="login-heading">
+            <h1>Login</h1>
+            <p>Sign in to continue</p>
+        </div>
 
         <form method="post">
 
-            <div asp-validation-summary="All"></div>
+            <div asp-validation-summary="All"
+                 class="validation-summary">
+            </div>
 
             <div class="form-group">
 
@@ -30,9 +45,12 @@
 
                 <input asp-for="LoginRequest.Email"
                        type="email"
-                       placeholder="Enter your email" />
+                       placeholder="Enter your email"
+                       autocomplete="email" />
 
-                <span asp-validation-for="LoginRequest.Email"></span>
+                <span asp-validation-for="LoginRequest.Email"
+                      class="field-error">
+                </span>
 
             </div>
 
@@ -44,9 +62,12 @@
 
                 <input asp-for="LoginRequest.Password"
                        type="password"
-                       placeholder="Enter your password" />
+                       placeholder="Enter your password"
+                       autocomplete="current-password" />
 
-                <span asp-validation-for="LoginRequest.Password"></span>
+                <span asp-validation-for="LoginRequest.Password"
+                      class="field-error">
+                </span>
 
             </div>
 

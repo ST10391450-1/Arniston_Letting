@@ -1,6 +1,7 @@
 ﻿using Arniston_Letting_API.Data;
 using Arniston_Letting_API.DTOs.Bookings;
 using Arniston_Letting_API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace Arniston_Letting_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class BookingsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -21,6 +23,7 @@ public class BookingsController : ControllerBase
     public async Task<ActionResult<IEnumerable<BookingDto>>> GetBookings()
     {
         var bookings = await _context.Bookings
+            .AsNoTracking()
             .Include(b => b.Property)
             .Select(b => new BookingDto
             {
@@ -44,6 +47,7 @@ public class BookingsController : ControllerBase
     public async Task<ActionResult<BookingDto>> GetBooking(int id)
     {
         var booking = await _context.Bookings
+            .AsNoTracking()
             .Include(b => b.Property)
             .Where(b => b.BookingId == id)
             .Select(b => new BookingDto
@@ -80,7 +84,16 @@ public class BookingsController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        if (request.CheckOut <= request.CheckIn)
+        {
+            return BadRequest(new
+            {
+                message = "Check-out must be after check-in."
+            });
+        }
+
         var propertyExists = await _context.Properties
+            .AsNoTracking()
             .AnyAsync(p => p.PropertyId == request.PropertyId);
 
         if (!propertyExists)
@@ -91,18 +104,25 @@ public class BookingsController : ControllerBase
             });
         }
 
-        if (request.CheckOut <= request.CheckIn)
+        var overlappingBooking = await _context.Bookings
+            .AsNoTracking()
+            .AnyAsync(b =>
+                b.PropertyId == request.PropertyId &&
+                request.CheckIn < b.CheckOut &&
+                request.CheckOut > b.CheckIn);
+
+        if (overlappingBooking)
         {
-            return BadRequest(new
+            return Conflict(new
             {
-                message = "Check-out must be after check-in."
+                message = "The property is already booked for the selected dates."
             });
         }
 
         var booking = new Booking
         {
             PropertyId = request.PropertyId,
-            BookerName = request.BookerName,
+            BookerName = request.BookerName.Trim(),
             CheckIn = request.CheckIn,
             CheckOut = request.CheckOut,
             Rate = request.Rate
@@ -113,6 +133,7 @@ public class BookingsController : ControllerBase
         await _context.SaveChangesAsync();
 
         var result = await _context.Bookings
+            .AsNoTracking()
             .Include(b => b.Property)
             .Where(b => b.BookingId == booking.BookingId)
             .Select(b => new BookingDto
@@ -145,6 +166,14 @@ public class BookingsController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        if (request.CheckOut <= request.CheckIn)
+        {
+            return BadRequest(new
+            {
+                message = "Check-out must be after check-in."
+            });
+        }
+
         var booking = await _context.Bookings
             .FirstOrDefaultAsync(b => b.BookingId == id);
 
@@ -157,6 +186,7 @@ public class BookingsController : ControllerBase
         }
 
         var propertyExists = await _context.Properties
+            .AsNoTracking()
             .AnyAsync(p => p.PropertyId == request.PropertyId);
 
         if (!propertyExists)
@@ -167,16 +197,24 @@ public class BookingsController : ControllerBase
             });
         }
 
-        if (request.CheckOut <= request.CheckIn)
+        var overlappingBooking = await _context.Bookings
+            .AsNoTracking()
+            .AnyAsync(b =>
+                b.BookingId != id &&
+                b.PropertyId == request.PropertyId &&
+                request.CheckIn < b.CheckOut &&
+                request.CheckOut > b.CheckIn);
+
+        if (overlappingBooking)
         {
-            return BadRequest(new
+            return Conflict(new
             {
-                message = "Check-out must be after check-in."
+                message = "The property is already booked for the selected dates."
             });
         }
 
         booking.PropertyId = request.PropertyId;
-        booking.BookerName = request.BookerName;
+        booking.BookerName = request.BookerName.Trim();
         booking.CheckIn = request.CheckIn;
         booking.CheckOut = request.CheckOut;
         booking.Rate = request.Rate;

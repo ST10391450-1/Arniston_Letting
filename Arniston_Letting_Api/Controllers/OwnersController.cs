@@ -1,6 +1,7 @@
 ﻿using Arniston_Letting_API.Data;
 using Arniston_Letting_API.DTOs.Owners;
 using Arniston_Letting_API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace Arniston_Letting_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class OwnersController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -21,6 +23,7 @@ public class OwnersController : ControllerBase
     public async Task<ActionResult<IEnumerable<OwnerDto>>> GetOwners()
     {
         var owners = await _context.Owners
+            .AsNoTracking()
             .Select(o => new OwnerDto
             {
                 OwnerId = o.OwnerId,
@@ -41,6 +44,7 @@ public class OwnersController : ControllerBase
     public async Task<ActionResult<OwnerDto>> GetOwner(int id)
     {
         var owner = await _context.Owners
+            .AsNoTracking()
             .Where(o => o.OwnerId == id)
             .Select(o => new OwnerDto
             {
@@ -74,14 +78,29 @@ public class OwnersController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        var fullName = request.FullName?.Trim();
+        var email = request.Email?.Trim().ToLowerInvariant();
+        var phoneNumber = request.PhoneNumber?.Trim();
+        var alternativeNumber = request.AlternativeNumber?.Trim();
+        var preferredContactMethod = request.PreferredContactMethod?.Trim();
+        var notes = request.Notes?.Trim();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return BadRequest(new
+            {
+                message = "Full name is required."
+            });
+        }
+
         var owner = new Owner
         {
-            FullName = request.FullName,
-            Email = request.Email,
-            PhoneNumber = request.PhoneNumber,
-            AlternativeNumber = request.AlternativeNumber,
-            PreferredContactMethod = request.PreferredContactMethod,
-            Notes = request.Notes
+            FullName = fullName,
+            Email = email,
+            PhoneNumber = phoneNumber,
+            AlternativeNumber = alternativeNumber,
+            PreferredContactMethod = preferredContactMethod,
+            Notes = notes
         };
 
         _context.Owners.Add(owner);
@@ -126,12 +145,27 @@ public class OwnersController : ControllerBase
             });
         }
 
-        owner.FullName = request.FullName;
-        owner.Email = request.Email;
-        owner.PhoneNumber = request.PhoneNumber;
-        owner.AlternativeNumber = request.AlternativeNumber;
-        owner.PreferredContactMethod = request.PreferredContactMethod;
-        owner.Notes = request.Notes;
+        var fullName = request.FullName?.Trim();
+        var email = request.Email?.Trim().ToLowerInvariant();
+        var phoneNumber = request.PhoneNumber?.Trim();
+        var alternativeNumber = request.AlternativeNumber?.Trim();
+        var preferredContactMethod = request.PreferredContactMethod?.Trim();
+        var notes = request.Notes?.Trim();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return BadRequest(new
+            {
+                message = "Full name is required."
+            });
+        }
+
+        owner.FullName = fullName;
+        owner.Email = email;
+        owner.PhoneNumber = phoneNumber;
+        owner.AlternativeNumber = alternativeNumber;
+        owner.PreferredContactMethod = preferredContactMethod;
+        owner.Notes = notes;
 
         await _context.SaveChangesAsync();
 
@@ -153,6 +187,7 @@ public class OwnersController : ControllerBase
         }
 
         var hasProperties = await _context.Properties
+            .AsNoTracking()
             .AnyAsync(p => p.OwnerId == id);
 
         if (hasProperties)

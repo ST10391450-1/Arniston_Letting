@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Localization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Razor Pages - everything under /Admin requires a signed-in user.
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/Admin");
@@ -16,7 +15,8 @@ builder.Services.AddRazorPages(options =>
     options.Conventions.AllowAnonymousToPage("/Privacy");
 });
 
-// Cookie authentication (the API returns the user details on login).
+builder.Services.AddHttpContextAccessor();
+
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -26,23 +26,33 @@ builder.Services
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Lax;
     });
 
 builder.Services.AddAuthorization();
 
-// Typed HTTP clients for the Arniston Letting API.
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"]
-    ?? "https://arniston.duckdns.org/";
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
+
+if (string.IsNullOrWhiteSpace(apiBaseUrl))
+{
+    throw new InvalidOperationException(
+        "ApiSettings:BaseUrl is not configured.");
+}
+
+builder.Services.AddTransient<JwtAuthorizationHandler>();
 
 void AddApiClient<TInterface, TImplementation>()
     where TInterface : class
     where TImplementation : class, TInterface
 {
-    builder.Services.AddHttpClient<TInterface, TImplementation>(client =>
-    {
-        client.BaseAddress = new Uri(apiBaseUrl);
-        client.Timeout = TimeSpan.FromSeconds(30);
-    });
+    builder.Services
+        .AddHttpClient<TInterface, TImplementation>(client =>
+        {
+            client.BaseAddress = new Uri(apiBaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        })
+        .AddHttpMessageHandler<JwtAuthorizationHandler>();
 }
 
 AddApiClient<IAuthApiService, AuthApiService>();
@@ -58,9 +68,8 @@ AddApiClient<IReportApiService, ReportApiService>();
 
 var app = builder.Build();
 
-// Use a fixed culture so decimals/dates round-trip through HTML inputs
-// (type="number" / type="date") regardless of the machine's regional settings.
 var culture = new CultureInfo("en-US");
+
 app.UseRequestLocalization(new RequestLocalizationOptions
 {
     DefaultRequestCulture = new RequestCulture(culture),
@@ -69,11 +78,9 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     RequestCultureProviders = new List<IRequestCultureProvider>()
 });
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -85,6 +92,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
 app.MapRazorPages()
    .WithStaticAssets();
 

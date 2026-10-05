@@ -1,0 +1,292 @@
+﻿@page "/AdminCleaner"
+@model Arniston_Letting_Front.Pages.Admin.AdminCleanerModel
+
+@{
+ViewData["Title"] = "Cleaners";
+}
+
+<div class="crud-page">
+<div class="crud-header">
+
+    <div>
+        <div class="crud-title">Cleaners</div>
+        <div class="crud-subtitle">Manage cleaning staff and availability</div>
+    </div>
+
+    <form method="get"
+          class="crud-search">
+
+        <input type="text"
+               name="Search"
+               value="@Model.Search"
+               placeholder="Search cleaners..." />
+
+        <button type="submit"
+                class="btn btn-primary">
+            Search
+        </button>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+            <a class="btn btn-muted"
+               asp-page="/Admin/AdminCleaner">
+                Clear
+            </a>
+        }
+
+    </form>
+
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-success">
+        @Model.Message
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-error">
+        @Model.Error
+    </div>
+}
+
+<div class="crud-card">
+
+    <div class="crud-card-header">
+
+        <div>
+            <h2>Cleaner List</h2>
+            <span>Cleaning staff and current availability</span>
+        </div>
+
+    </div>
+
+    <div class="crud-table-wrap">
+
+        <table class="crud-table">
+
+            <thead>
+                <tr>
+                    <th class="col-id">ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Availability</th>
+                    <th class="col-actions">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @if (Model.Items.Any())
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        <tr class="@(Model.EditId == item.CleanerId ? "selected" : "")">
+
+                            <td class="booking-id">
+                                @item.CleanerId
+                            </td>
+
+                            <td class="booking-property">
+                                @item.FullName
+                            </td>
+
+                            <td>
+                                @item.PhoneNumber
+                            </td>
+
+                            <td>
+                                @item.Email
+                            </td>
+
+                            <td>
+
+                                @if (item.Available)
+                                {
+                                    <span class="dashboard-status status-completed">
+                                        Available
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="dashboard-status status-pending">
+                                        Unavailable
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td>
+
+                                <div class="crud-actions">
+
+                                    <a class="btn btn-small btn-primary"
+                                       asp-page="/Admin/AdminCleaner"
+                                       asp-route-EditId="@item.CleanerId"
+                                       asp-route-Search="@Model.Search">
+                                        Edit
+                                    </a>
+
+                                    <form method="post"
+                                          asp-page-handler="Delete"
+                                          asp-route-id="@item.CleanerId"
+                                          asp-route-Search="@Model.Search"
+                                          onsubmit="return confirm('Delete this cleaner?');">
+
+                                        <button type="submit"
+                                                class="btn btn-small btn-danger">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6"
+                            class="empty-state">
+                            No cleaners found.
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+<div class="crud-panel">
+
+    <div class="crud-panel-header">
+
+        <div>
+
+            <h2>
+                @(Model.EditId.HasValue
+                    ? $"Edit cleaner #{Model.EditId}"
+                    : "Add new cleaner")
+            </h2>
+
+            <span>
+                @(Model.EditId.HasValue
+                    ? "Update the cleaner information below"
+                    : "Add a new cleaning staff member")
+            </span>
+
+        </div>
+
+    </div>
+
+    <form method="post"
+          asp-page-handler="Save"
+          asp-route-Search="@Model.Search">
+
+        <input type="hidden"
+               name="EditId"
+               value="@Model.EditId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="field-error">
+        </div>
+
+        <div class="crud-form">
+
+            <div class="crud-field">
+
+                <label asp-for="Input.FullName">
+                    Full name
+                </label>
+
+                <input asp-for="Input.FullName"
+                       type="text"
+                       placeholder="Enter full name" />
+
+                <span asp-validation-for="Input.FullName"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.PhoneNumber">
+                    Phone number
+                </label>
+
+                <input asp-for="Input.PhoneNumber"
+                       type="tel"
+                       placeholder="Enter phone number" />
+
+                <span asp-validation-for="Input.PhoneNumber"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.Email">
+                    Email
+                </label>
+
+                <input asp-for="Input.Email"
+                       type="email"
+                       placeholder="Enter email address" />
+
+                <span asp-validation-for="Input.Email"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field check">
+
+                <input asp-for="Input.Available"
+                       type="checkbox" />
+
+                <label asp-for="Input.Available">
+                    Available for cleaning work
+                </label>
+
+            </div>
+
+        </div>
+
+        <div class="crud-buttons">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                @(Model.EditId.HasValue ? "Update Cleaner" : "Create Cleaner")
+            </button>
+
+            @if (Model.EditId.HasValue)
+            {
+                <a class="btn btn-muted"
+                   asp-page="/Admin/AdminCleaner"
+                   asp-route-Search="@Model.Search">
+                    Cancel
+                </a>
+            }
+
+        </div>
+
+    </form>
+
+</div>
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" />
+}

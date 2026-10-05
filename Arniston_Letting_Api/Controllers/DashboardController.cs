@@ -1,5 +1,6 @@
 ﻿using Arniston_Letting_API.Data;
 using Arniston_Letting_API.DTOs.Dashboard;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +8,7 @@ namespace Arniston_Letting_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class DashboardController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -46,7 +48,7 @@ public class DashboardController : ControllerBase
     public async Task<IActionResult> GetUpcomingBookings()
     {
         var bookings = await _context.Bookings
-            .Include(b => b.Property)
+            .AsNoTracking()
             .Where(b => b.CheckIn >= DateTime.Today)
             .OrderBy(b => b.CheckIn)
             .Select(b => new
@@ -72,8 +74,7 @@ public class DashboardController : ControllerBase
         var today = DateTime.Today;
 
         var tasks = await _context.CleanerTasks
-            .Include(t => t.Cleaner)
-            .Include(t => t.Location)
+            .AsNoTracking()
             .Where(t => t.Date.Date == today)
             .OrderBy(t => t.Time)
             .Select(t => new
@@ -101,7 +102,7 @@ public class DashboardController : ControllerBase
     public async Task<IActionResult> GetOpenBreakages()
     {
         var breakages = await _context.Breakages
-            .Include(b => b.Location)
+            .AsNoTracking()
             .Where(b => !b.Resolved)
             .OrderByDescending(b => b.Date)
             .ThenByDescending(b => b.Time)

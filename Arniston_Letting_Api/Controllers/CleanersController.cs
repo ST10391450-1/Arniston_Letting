@@ -1,6 +1,7 @@
 ﻿using Arniston_Letting_API.Data;
 using Arniston_Letting_API.DTOs.Cleaners;
 using Arniston_Letting_API.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace Arniston_Letting_API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Admin")]
 public class CleanersController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -21,6 +23,7 @@ public class CleanersController : ControllerBase
     public async Task<ActionResult<IEnumerable<CleanerDto>>> GetCleaners()
     {
         var cleaners = await _context.Cleaners
+            .AsNoTracking()
             .Select(c => new CleanerDto
             {
                 CleanerId = c.CleanerId,
@@ -39,6 +42,7 @@ public class CleanersController : ControllerBase
     public async Task<ActionResult<CleanerDto>> GetCleaner(int id)
     {
         var cleaner = await _context.Cleaners
+            .AsNoTracking()
             .Where(c => c.CleanerId == id)
             .Select(c => new CleanerDto
             {
@@ -70,11 +74,23 @@ public class CleanersController : ControllerBase
             return BadRequest(ModelState);
         }
 
+        var fullName = request.FullName?.Trim();
+        var phoneNumber = request.PhoneNumber?.Trim();
+        var email = request.Email?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return BadRequest(new
+            {
+                message = "Full name is required."
+            });
+        }
+
         var cleaner = new Cleaner
         {
-            FullName = request.FullName,
-            PhoneNumber = request.PhoneNumber,
-            Email = request.Email,
+            FullName = fullName,
+            PhoneNumber = phoneNumber,
+            Email = email,
             Available = request.Available
         };
 
@@ -118,9 +134,21 @@ public class CleanersController : ControllerBase
             });
         }
 
-        cleaner.FullName = request.FullName;
-        cleaner.PhoneNumber = request.PhoneNumber;
-        cleaner.Email = request.Email;
+        var fullName = request.FullName?.Trim();
+        var phoneNumber = request.PhoneNumber?.Trim();
+        var email = request.Email?.Trim().ToLowerInvariant();
+
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return BadRequest(new
+            {
+                message = "Full name is required."
+            });
+        }
+
+        cleaner.FullName = fullName;
+        cleaner.PhoneNumber = phoneNumber;
+        cleaner.Email = email;
         cleaner.Available = request.Available;
 
         await _context.SaveChangesAsync();

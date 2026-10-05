@@ -2,137 +2,332 @@
 @model Arniston_Letting_Front.Pages.Admin.AdminOwnersModel
 
 @{
-    ViewData["Title"] = "Owners";
+ViewData["Title"] = "Owners";
 }
 
 <div class="crud-page">
+<div class="crud-header">
 
-    <div class="crud-header">
+    <div>
         <div class="crud-title">Owners</div>
-
-        <form method="get" class="crud-search">
-            <input type="text" name="Search" value="@Model.Search" placeholder="Search..." />
-            <button type="submit" class="btn btn-primary">Search</button>
-            @if (!string.IsNullOrWhiteSpace(Model.Search))
-            {
-                <a class="btn btn-muted" asp-page="/Admin/AdminOwners">Clear</a>
-            }
-        </form>
+        <div class="crud-subtitle">Manage property owners and contact information</div>
     </div>
 
-    @if (!string.IsNullOrEmpty(Model.Message))
-    {
-        <div class="alert alert-success">@Model.Message</div>
-    }
+    <form method="get"
+          class="crud-search">
 
-    @if (!string.IsNullOrEmpty(Model.Error))
-    {
-        <div class="alert alert-error">@Model.Error</div>
-    }
+        <input type="text"
+               name="Search"
+               value="@Model.Search"
+               placeholder="Search owners..." />
+
+        <button type="submit"
+                class="btn btn-primary">
+            Search
+        </button>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Search))
+        {
+            <a class="btn btn-muted"
+               asp-page="/Admin/AdminOwners">
+                Clear
+            </a>
+        }
+
+    </form>
+
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Message))
+{
+    <div class="alert alert-success">
+        @Model.Message
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.Error))
+{
+    <div class="alert alert-error">
+        @Model.Error
+    </div>
+}
+
+<div class="crud-card">
+
+    <div class="crud-card-header">
+
+        <div>
+            <h2>Owner List</h2>
+            <span>Property owners and preferred contact details</span>
+        </div>
+
+    </div>
 
     <div class="crud-table-wrap">
+
         <table class="crud-table">
+
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th class="col-id">ID</th>
                     <th>Name</th>
                     <th>Email</th>
                     <th>Phone</th>
-                    <th>Contact via</th>
-                    <th></th>
+                    <th>Contact method</th>
+                    <th class="col-actions">Actions</th>
                 </tr>
             </thead>
+
             <tbody>
+
                 @if (Model.Items.Any())
                 {
                     foreach (var item in Model.Items)
                     {
                         <tr class="@(Model.EditId == item.OwnerId ? "selected" : "")">
-                            <td>@(item.OwnerId)</td>
-                            <td>@(item.FullName)</td>
-                            <td>@(item.Email)</td>
-                            <td>@(item.PhoneNumber)</td>
-                            <td>@(item.PreferredContactMethod)</td>
-                            <td>
-                                <div class="crud-actions">
-                                    <a class="btn btn-small btn-primary" asp-page="/Admin/AdminOwners" asp-route-EditId="@item.OwnerId" asp-route-Search="@Model.Search">Edit</a>
-                                    <form method="post" asp-page-handler="Delete" asp-route-id="@item.OwnerId" asp-route-Search="@Model.Search"
-                                          onsubmit="return confirm('Delete this owner?');">
-                                        <button type="submit" class="btn btn-small btn-danger">Delete</button>
-                                    </form>
-                                </div>
+
+                            <td class="booking-id">
+                                @item.OwnerId
                             </td>
+
+                            <td class="booking-property">
+                                @item.FullName
+                            </td>
+
+                            <td>
+                                @item.Email
+                            </td>
+
+                            <td>
+                                @item.PhoneNumber
+                            </td>
+
+                            <td>
+                                @item.PreferredContactMethod
+                            </td>
+
+                            <td>
+
+                                <div class="crud-actions">
+
+                                    <a class="btn btn-small btn-primary"
+                                       asp-page="/Admin/AdminOwners"
+                                       asp-route-EditId="@item.OwnerId"
+                                       asp-route-Search="@Model.Search">
+                                        Edit
+                                    </a>
+
+                                    <form method="post"
+                                          asp-page-handler="Delete"
+                                          asp-route-id="@item.OwnerId"
+                                          asp-route-Search="@Model.Search"
+                                          onsubmit="return confirm('Delete this owner?');">
+
+                                        <button type="submit"
+                                                class="btn btn-small btn-danger">
+                                            Delete
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </td>
+
                         </tr>
                     }
                 }
                 else
                 {
                     <tr>
-                        <td colspan="6">No owners found.</td>
+                        <td colspan="6"
+                            class="empty-state">
+                            No owners found.
+                        </td>
                     </tr>
                 }
+
             </tbody>
+
         </table>
-    </div>
 
-    <div class="crud-panel">
-        <h2>@(Model.EditId.HasValue ? $"Edit owner #{Model.EditId}" : "Add new owner")</h2>
-
-        <form method="post" asp-page-handler="Save" asp-route-Search="@Model.Search">
-            <input type="hidden" name="EditId" value="@Model.EditId" />
-
-            <div asp-validation-summary="ModelOnly" class="field-error"></div>
-
-            <div class="crud-form">
-                <div class="crud-field">
-                    <label asp-for="Input.FullName">Full name</label>
-                    <input asp-for="Input.FullName" type="text" />
-                    <span asp-validation-for="Input.FullName" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.Email">Email</label>
-                    <input asp-for="Input.Email" type="email" />
-                    <span asp-validation-for="Input.Email" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.PhoneNumber">Phone number</label>
-                    <input asp-for="Input.PhoneNumber" type="text" />
-                    <span asp-validation-for="Input.PhoneNumber" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.AlternativeNumber">Alternative number</label>
-                    <input asp-for="Input.AlternativeNumber" type="text" />
-                    <span asp-validation-for="Input.AlternativeNumber" class="field-error"></span>
-                </div>
-                <div class="crud-field">
-                    <label asp-for="Input.PreferredContactMethod">Preferred contact method</label>
-                    <select asp-for="Input.PreferredContactMethod">
-                        <option value="">-- Select --</option>
-                        <option value="Email">Email</option>
-                        <option value="Phone">Phone</option>
-                        <option value="WhatsApp">WhatsApp</option>
-                    </select>
-                    <span asp-validation-for="Input.PreferredContactMethod" class="field-error"></span>
-                </div>
-                <div class="crud-field wide">
-                    <label asp-for="Input.Notes">Notes</label>
-                    <textarea asp-for="Input.Notes" rows="3"></textarea>
-                    <span asp-validation-for="Input.Notes" class="field-error"></span>
-                </div>
-            </div>
-
-            <div class="crud-buttons">
-                <button type="submit" class="btn btn-primary">@(Model.EditId.HasValue ? "Update" : "Create")</button>
-                @if (Model.EditId.HasValue)
-                {
-                    <a class="btn btn-muted" asp-page="/Admin/AdminOwners" asp-route-Search="@Model.Search">Cancel</a>
-                }
-            </div>
-        </form>
     </div>
 
 </div>
 
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+<div class="crud-panel">
+
+    <div class="crud-panel-header">
+
+        <div>
+
+            <h2>
+                @(Model.EditId.HasValue
+                    ? $"Edit owner #{Model.EditId}"
+                    : "Add new owner")
+            </h2>
+
+            <span>
+                @(Model.EditId.HasValue
+                    ? "Update the owner information below"
+                    : "Add a new property owner")
+            </span>
+
+        </div>
+
+    </div>
+
+    <form method="post"
+          asp-page-handler="Save"
+          asp-route-Search="@Model.Search">
+
+        <input type="hidden"
+               name="EditId"
+               value="@Model.EditId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="field-error">
+        </div>
+
+        <div class="crud-form">
+
+            <div class="crud-field">
+
+                <label asp-for="Input.FullName">
+                    Full name
+                </label>
+
+                <input asp-for="Input.FullName"
+                       type="text"
+                       placeholder="Enter full name" />
+
+                <span asp-validation-for="Input.FullName"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.Email">
+                    Email
+                </label>
+
+                <input asp-for="Input.Email"
+                       type="email"
+                       placeholder="Enter email address" />
+
+                <span asp-validation-for="Input.Email"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.PhoneNumber">
+                    Phone number
+                </label>
+
+                <input asp-for="Input.PhoneNumber"
+                       type="tel"
+                       placeholder="Enter phone number" />
+
+                <span asp-validation-for="Input.PhoneNumber"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.AlternativeNumber">
+                    Alternative number
+                </label>
+
+                <input asp-for="Input.AlternativeNumber"
+                       type="tel"
+                       placeholder="Enter alternative number" />
+
+                <span asp-validation-for="Input.AlternativeNumber"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field">
+
+                <label asp-for="Input.PreferredContactMethod">
+                    Preferred contact method
+                </label>
+
+                <select asp-for="Input.PreferredContactMethod">
+
+                    <option value="">
+                        -- Select contact method --
+                    </option>
+
+                    <option value="Email">
+                        Email
+                    </option>
+
+                    <option value="Phone">
+                        Phone
+                    </option>
+
+                    <option value="WhatsApp">
+                        WhatsApp
+                    </option>
+
+                </select>
+
+                <span asp-validation-for="Input.PreferredContactMethod"
+                      class="field-error">
+                </span>
+
+            </div>
+
+            <div class="crud-field wide">
+
+                <label asp-for="Input.Notes">
+                    Notes
+                </label>
+
+                <textarea asp-for="Input.Notes"
+                          rows="4"
+                          placeholder="Enter any additional owner information"></textarea>
+
+                <span asp-validation-for="Input.Notes"
+                      class="field-error">
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="crud-buttons">
+
+            <button type="submit"
+                    class="btn btn-primary">
+                @(Model.EditId.HasValue ? "Update Owner" : "Create Owner")
+            </button>
+
+            @if (Model.EditId.HasValue)
+            {
+                <a class="btn btn-muted"
+                   asp-page="/Admin/AdminOwners"
+                   asp-route-Search="@Model.Search">
+                    Cancel
+                </a>
+            }
+
+        </div>
+
+    </form>
+
+</div>
+
+</div>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" />
 }

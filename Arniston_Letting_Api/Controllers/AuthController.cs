@@ -1,9 +1,8 @@
 ﻿using Arniston_Letting_API.DTOs.Auth;
 using Arniston_Letting_API.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-using LoginRequest = Arniston_Letting_API.DTOs.Auth.LoginRequest;
-using RegisterRequest = Arniston_Letting_API.DTOs.Auth.RegisterRequest;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Arniston_Letting_API.Controllers;
 
@@ -18,8 +17,10 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
+   /* [AllowAnonymous]
     [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+    public async Task<IActionResult> Register(
+        [FromBody] RegisterRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -39,10 +40,13 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
+   */
 
-
+    [AllowAnonymous]
+    [EnableRateLimiting("LoginPolicy")]
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    public async Task<IActionResult> Login(
+        [FromBody] LoginRequest request)
     {
         if (!ModelState.IsValid)
         {
@@ -63,15 +67,27 @@ public class AuthController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize]
     [HttpPost("logout/{userId:int}")]
     public async Task<IActionResult> Logout(int userId)
     {
+        var authenticatedUserId =
+            User.FindFirst(
+                System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(authenticatedUserId, out var currentUserId) ||
+            currentUserId != userId)
+        {
+            return Forbid();
+        }
+
         var result = await _authService.LogoutAsync(userId);
 
         if (!result)
         {
             return BadRequest(new
             {
+                success = false,
                 message = "Logout failed."
             });
         }

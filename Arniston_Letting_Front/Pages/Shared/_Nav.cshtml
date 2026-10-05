@@ -4,109 +4,88 @@
 
 <header class="site-header">
 
-    <div class="brand">
+<div class="brand-logo">
+    <img src="~/Assests/icon.png"
+         alt="Arniston Holiday Letting" />
+</div>
 
-        <div class="brand-logo">
-            ↗
-        </div>
+<div class="header-title">
+    @ViewData["Title"]
+</div>
 
-        <div class="brand-name">
-            Arniston Holiday Letting
-        </div>
+<div class="header-right">
 
+    @if (ViewData["Title"]?.ToString() != "Admin Dashboard" &&
+         ViewData["NoNav"]?.ToString() != "true")
+    {
+        <a href="/AdminDashboard" class="return-admin">
+            Return To Admin
+        </a>
+    }
+
+    <div class="header-date">
+        <strong>Today's Date</strong>
+        <span>@DateTime.Now.ToString("dd/MM/yyyy")</span>
     </div>
 
-    <div class="header-title">
-        @ViewData["Title"]
-    </div>
+</div>
 
-    <div class="header-right">
-
-        @if (ViewData["Title"]?.ToString() != "Admin Dashboard" &&
-             ViewData["NoNav"]?.ToString() != "true")
-        {
-            <a href="/AdminDashboard"
-               class="return-admin">
-                Return To Admin
-            </a>
-        }
-
-        <div class="header-date">
-
-            <strong>Today's Date:</strong>
-
-            <span>
-                @DateTime.Now.ToString("dd/MM/yyyy")
-            </span>
-
-        </div>
-
-    </div>
 
 </header>
 
 <aside class="sidebar">
 
-    <nav class="main-navigation" aria-label="Main navigation">
+<nav class="main-navigation" aria-label="Main navigation">
 
-        <div class="nav-item">
-            <a href="/AdminBookings">
-                Bookings
-            </a>
-        </div>
+    <a href="/AdminBookings"
+       class="nav-item @(Context.Request.Path == "/AdminBookings" ? "active" : "")">
+        <span>Bookings</span>
+    </a>
 
-        <div class="nav-item">
-            <a href="/AdminProperties">
-                Properties
-            </a>
-        </div>
+    <a href="/AdminProperties"
+       class="nav-item @(Context.Request.Path == "/AdminProperties" ? "active" : "")">
+        <span>Properties</span>
+    </a>
 
-        <div class="nav-item">
-            <a href="/AdminOwners">
-                Owners
-            </a>
-        </div>
+    <a href="/AdminOwners"
+       class="nav-item @(Context.Request.Path == "/AdminOwners" ? "active" : "")">
+        <span>Owners</span>
+    </a>
 
-        <div class="nav-item">
-            <a href="/AdminCleaner">
-                Cleaners
-            </a>
-        </div>
+    <a href="/AdminCleaner"
+       class="nav-item @(Context.Request.Path == "/AdminCleaner" ? "active" : "")">
+        <span>Cleaners</span>
+    </a>
 
-        <div class="nav-item nav-task">
-            <a href="/AdminTasks">
-                Tasks
-            </a>
-        </div>
+    <a href="/AdminTasks"
+       class="nav-item @(Context.Request.Path == "/AdminTasks" ? "active" : "")">
+        <span>Tasks</span>
+    </a>
 
-        <div class="nav-item">
-            <a href="/AdminBreakages">
-                Breakages
-            </a>
-        </div>
+    <a href="/AdminBreakages"
+       class="nav-item @(Context.Request.Path == "/AdminBreakages" ? "active" : "")">
+        <span>Breakages</span>
+    </a>
 
-        <div class="nav-item">
-            <a href="/AdminNotifications">
-                Notifications
-            </a>
-        </div>
+    <a href="/AdminNotifications"
+       class="nav-item @(Context.Request.Path == "/AdminNotifications" ? "active" : "")">
+        <span>Notifications</span>
+    </a>
 
-        <div class="nav-item">
-            <a href="/AdminReports">
-                Reports
-            </a>
-        </div>
+    <a href="/AdminReports"
+       class="nav-item @(Context.Request.Path == "/AdminReports" ? "active" : "")">
+        <span>Reports</span>
+    </a>
 
-    </nav>
+</nav>
 
-    <div class="sidebar-bottom">
+<div class="sidebar-bottom">
 
-        <form method="post" asp-page="/Logout" style="margin:0">
-            <button type="submit" class="logout-button" style="border:0;cursor:pointer;font:inherit;width:100%">
-                LOG OUT
-            </button>
-        </form>
+    <form method="post" asp-page="/Logout">
+        <button type="submit" class="logout-button">
+            LOG OUT
+        </button>
+    </form>
 
-    </div>
-
+</div>
 </aside>
