@@ -1,5 +1,8 @@
 # Arniston Letting
 
+| Thomas Dennis | ST10391450
+| Dwayne Prins  | ST10032544 
+
 Hosted At https://arniston.duckdns.org/Login 
 
 This is hosted on an old laptop temporarily since existing hosting service did not have support for .Net 10 nor Asp.Net Core
