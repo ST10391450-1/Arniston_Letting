@@ -1,4 +1,4 @@
 <Solution>
   <Project Path="Arniston_Letting_Front/Arniston_Letting_Front.csproj" />
-  <Project Path = " Arniston_Letting_Api/Arniston_Letting_Api.csproj" />
+  <Project Path=" Arniston_Letting_Api/Arniston_Letting_Api.csproj" />
 </Solution>

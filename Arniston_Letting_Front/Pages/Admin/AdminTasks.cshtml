@@ -1,0 +1,138 @@
+﻿@page "/AdminTasks"
+@model Arniston_Letting_Front.Pages.Admin.AdminTasksModel
+
+@{
+    ViewData["Title"] = "Cleaning Tasks";
+}
+
+<div class="crud-page">
+
+    <div class="crud-header">
+        <div class="crud-title">Cleaning Tasks</div>
+
+        <form method="get" class="crud-search">
+            <input type="text" name="Search" value="@Model.Search" placeholder="Search..." />
+            <button type="submit" class="btn btn-primary">Search</button>
+            @if (!string.IsNullOrWhiteSpace(Model.Search))
+            {
+                <a class="btn btn-muted" asp-page="/Admin/AdminTasks">Clear</a>
+            }
+        </form>
+    </div>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="alert alert-success">@Model.Message</div>
+    }
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+
+    <div class="crud-table-wrap">
+        <table class="crud-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cleaner</th>
+                    <th>Property</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Any())
+                {
+                    foreach (var item in Model.Items)
+                    {
+                        <tr class="@(Model.EditId == item.CleanerTaskId ? "selected" : "")">
+                            <td>@(item.CleanerTaskId)</td>
+                            <td>@(item.CleanerName)</td>
+                            <td>@(item.LocationName)</td>
+                            <td>@(item.Date.ToString("yyyy-MM-dd"))</td>
+                            <td>@(item.Time.ToString(@"hh\:mm"))</td>
+                            <td>@(item.Completed ? "Completed" : "Pending")</td>
+                            <td>
+                                <div class="crud-actions">
+                                    <a class="btn btn-small btn-primary" asp-page="/Admin/AdminTasks" asp-route-EditId="@item.CleanerTaskId" asp-route-Search="@Model.Search">Edit</a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@item.CleanerTaskId" asp-route-Search="@Model.Search"
+                                          onsubmit="return confirm('Delete this task?');">
+                                        <button type="submit" class="btn btn-small btn-danger">Delete</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="7">No cleaning tasks found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="crud-panel">
+        <h2>@(Model.EditId.HasValue ? $"Edit task #{Model.EditId}" : "Add new task")</h2>
+
+        <form method="post" asp-page-handler="Save" asp-route-Search="@Model.Search">
+            <input type="hidden" name="EditId" value="@Model.EditId" />
+
+            <div asp-validation-summary="ModelOnly" class="field-error"></div>
+
+            <div class="crud-form">
+                <div class="crud-field">
+                    <label asp-for="Input.CleanerId">Cleaner</label>
+                    <select asp-for="Input.CleanerId" asp-items="Model.CleanerOptions">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="Input.CleanerId" class="field-error"></span>
+                </div>
+                <div class="crud-field">
+                    <label asp-for="Input.LocationId">Property</label>
+                    <select asp-for="Input.LocationId" asp-items="Model.PropertyOptions">
+                        <option value="">-- Select --</option>
+                    </select>
+                    <span asp-validation-for="Input.LocationId" class="field-error"></span>
+                </div>
+                <div class="crud-field">
+                    <label asp-for="Input.Date">Date</label>
+                    <input asp-for="Input.Date" type="date" />
+                    <span asp-validation-for="Input.Date" class="field-error"></span>
+                </div>
+                <div class="crud-field">
+                    <label asp-for="Input.Time">Time</label>
+                    <input asp-for="Input.Time" type="time" />
+                    <span asp-validation-for="Input.Time" class="field-error"></span>
+                </div>
+                <div class="crud-field check">
+                    <input asp-for="Input.Completed" type="checkbox" />
+                    <label asp-for="Input.Completed">Completed</label>
+                </div>
+                <div class="crud-field wide">
+                    <label asp-for="Input.Notes">Notes</label>
+                    <textarea asp-for="Input.Notes" rows="3"></textarea>
+                    <span asp-validation-for="Input.Notes" class="field-error"></span>
+                </div>
+            </div>
+
+            <div class="crud-buttons">
+                <button type="submit" class="btn btn-primary">@(Model.EditId.HasValue ? "Update" : "Create")</button>
+                @if (Model.EditId.HasValue)
+                {
+                    <a class="btn btn-muted" asp-page="/Admin/AdminTasks" asp-route-Search="@Model.Search">Cancel</a>
+                }
+            </div>
+        </form>
+    </div>
+
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

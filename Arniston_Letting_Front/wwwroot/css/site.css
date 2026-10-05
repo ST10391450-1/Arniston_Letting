@@ -1,31 +1,215 @@
+/* =========================================
+   GLOBAL
+   ========================================= */
+
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #d9d9d9;
+    color: #000000;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+
+/* =========================================
+   ARNISTON HEADER
+   ========================================= */
+
+.arniston-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border-bottom: 1px solid #4d4d4d;
+    z-index: 1000;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.arniston-brand {
+    width: 234px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 17px;
+    box-sizing: border-box;
+}
+
+.arniston-logo {
+    width: 36px;
+    height: 36px;
+    background: #4d4d4d;
+    border-radius: 2px;
+}
+
+.arniston-brand-name {
+    color: #02bea0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.arniston-header-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #02bea0;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.arniston-header-date {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    padding-right: 28px;
+    color: #000000;
+    font-size: 13px;
+}
+
+
+/* =========================================
+   ARNISTON SIDEBAR
+   ========================================= */
+
+.arniston-sidebar {
+    position: fixed;
+    top: 52px;
+    left: 0;
+    bottom: 0;
+    width: 234px;
+    background: #4d4d4d;
+    display: flex;
+    flex-direction: column;
+    z-index: 999;
+}
+
+.arniston-profile {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 12px 15px 28px;
+    color: #ffffff;
+}
+
+.arniston-avatar {
+    width: 69px;
+    height: 69px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #02bea0;
+}
+
+
+/* =========================================
+   NAVIGATION
+   ========================================= */
+
+.arniston-navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    padding: 30px 36px;
+}
+
+.arniston-nav-placeholder {
+    width: 160px;
+    height: 39px;
+    border-radius: 22px;
+    background: #ffffff;
+}
+
+
+/* =========================================
+   SIDEBAR BOTTOM
+   ========================================= */
+
+.arniston-sidebar-bottom {
+    margin-top: auto;
+    border-top: 1px solid #bfbfbf;
+    padding-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.arniston-collapse {
+    align-self: flex-end;
+    width: 62px;
+    height: 63px;
+    padding: 0;
+    border: 0;
+    border-left: 1px solid #bfbfbf;
+    border-bottom: 1px solid #bfbfbf;
+    background: #4d4d4d;
+    color: #ffffff;
+    font-size: 42px;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.arniston-logout-placeholder {
+    width: 159px;
+    height: 39px;
+    margin-top: 32px;
+    border-radius: 22px;
+    background: #ff383c;
+}
+
+
+/* =========================================
+   PAGE CONTENT
+   ========================================= */
+
+.page-content {
+    margin-left: 234px;
+    padding-top: 52px;
+    min-height: 100vh;
+    box-sizing: border-box;
+    background: #d9d9d9;
+}
+
+
+/* =========================================
+   MOBILE
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .arniston-sidebar {
+        width: 190px;
+    }
+
+    .arniston-brand {
+        width: auto;
+    }
+
+    .arniston-brand-name,
+    .arniston-header-title,
+    .arniston-header-date strong {
+        display: none;
+    }
+
+    .page-content {
+        margin-left: 190px;
+    }
+
+    .arniston-navigation {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
 }

@@ -1,0 +1,378 @@
+﻿/* =========================================================
+   ARNISTON HOLIDAY LETTING
+   MAIN NAVIGATION
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE VARIABLES
+   ========================================================= */
+
+:root {
+    --nav-sidebar-width: 198px;
+    --nav-header-height: 49px;
+    --nav-grey: #4d4d4d;
+    --nav-background: #d9d9d9;
+    --nav-white: #ffffff;
+    --nav-black: #000000;
+    --nav-teal: #02bea0;
+    --nav-red: #c9151b;
+    --nav-line: #d9d9d9;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--nav-header-height);
+    background: var(--nav-white);
+    border-top: 2px solid var(--nav-teal);
+    border-bottom: 1px solid #777777;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    z-index: 2000;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.brand {
+    width: 390px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    padding-left: 14px;
+    box-sizing: border-box;
+}
+
+
+/* Blue logo square */
+
+.brand-logo {
+    width: 32px;
+    height: 32px;
+    background: #3b9bd9;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4d4d4d;
+    font-size: 22px;
+    font-weight: bold;
+    margin-right: 18px;
+}
+
+
+/* Company name */
+
+.brand-name {
+    color: var(--nav-teal);
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   HEADER TITLE
+   ========================================================= */
+
+.header-title {
+    flex: 1;
+    text-align: center;
+    color: var(--nav-teal);
+    font-size: 12px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   HEADER RIGHT
+   ========================================================= */
+
+.header-right {
+    width: 365px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 48px;
+    padding-right: 18px;
+    box-sizing: border-box;
+}
+
+
+/* Return To Admin */
+
+.return-admin {
+    color: #0066cc;
+    font-size: 11px;
+    font-weight: bold;
+    text-decoration: underline;
+    white-space: nowrap;
+}
+
+    .return-admin:hover {
+        color: #004c99;
+    }
+
+
+/* =========================================================
+   DATE
+   ========================================================= */
+
+.header-date {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    color: var(--nav-black);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+    .header-date strong {
+        font-weight: bold;
+    }
+
+    .header-date span {
+        font-weight: normal;
+    }
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+    position: fixed;
+    top: var(--nav-header-height);
+    left: 0;
+    bottom: 0;
+    width: var(--nav-sidebar-width);
+    background: var(--nav-grey);
+    border-right: 2px solid #777777;
+    box-sizing: border-box;
+    z-index: 1500;
+}
+
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+
+.main-navigation {
+    position: relative;
+    width: 100%;
+    padding-top: 7px;
+    box-sizing: border-box;
+}
+
+
+    /*
+    Main vertical connector.
+    This is the white line visible on the left
+    of the navigation buttons.
+*/
+
+    .main-navigation::before {
+        content: "";
+        position: absolute;
+        left: 15px;
+        top: 23px;
+        bottom: 36px;
+        width: 1px;
+        background: var(--nav-line);
+    }
+
+
+/* =========================================================
+   NAV ITEM
+   ========================================================= */
+
+.nav-item {
+    position: relative;
+    height: 49px;
+    display: flex;
+    align-items: center;
+    padding-left: 34px;
+    box-sizing: border-box;
+}
+
+
+    /*
+    Horizontal connector from vertical line
+    to button.
+*/
+
+    .nav-item::before {
+        content: "";
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        width: 19px;
+        height: 1px;
+        background: var(--nav-line);
+    }
+
+
+    /* =========================================================
+   NAV BUTTON
+   ========================================================= */
+
+    .nav-item a {
+        position: relative;
+        width: 134px;
+        height: 33px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        background: var(--nav-teal);
+        color: var(--nav-white);
+        border-radius: 20px;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: bold;
+        line-height: 1;
+        z-index: 2;
+        transition: background-color 0.15s ease;
+    }
+
+
+        .nav-item a:hover {
+            background: #00aa8e;
+            color: var(--nav-white);
+        }
+
+
+/* =========================================================
+   TASKS
+   ========================================================= */
+
+/*
+    Tasks is a child of Cleaners.
+
+    The screenshot shows:
+    Cleaners
+       |
+       └── Tasks
+*/
+
+.nav-task {
+    padding-left: 51px;
+    height: 49px;
+}
+
+
+    /* Horizontal Tasks connector */
+
+    .nav-task::before {
+        left: 29px;
+        width: 22px;
+    }
+
+
+    /* Vertical child connector */
+
+    .nav-task::after {
+        content: "";
+        position: absolute;
+        left: 29px;
+        top: -25px;
+        height: 49px;
+        width: 1px;
+        background: var(--nav-line);
+    }
+
+
+/* =========================================================
+   SIDEBAR BOTTOM
+   ========================================================= */
+
+.sidebar-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 12px;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
+.logout-button {
+    width: 108px;
+    height: 33px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    background: var(--nav-red);
+    color: var(--nav-white);
+    border-radius: 20px;
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: bold;
+    transition: background-color 0.15s ease;
+}
+
+
+    .logout-button:hover {
+        background: #a90f14;
+        color: var(--nav-white);
+    }
+
+
+/* =========================================================
+   MAIN PAGE CONTENT
+   ========================================================= */
+
+.page-content {
+    margin-left: var(--nav-sidebar-width);
+    padding-top: var(--nav-header-height);
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    :root {
+        --nav-sidebar-width: 180px;
+    }
+
+    .brand {
+        width: 300px;
+    }
+
+    .header-right {
+        width: 300px;
+        gap: 20px;
+    }
+
+    .header-date {
+        gap: 10px;
+    }
+
+    .nav-item a {
+        width: 130px;
+    }
+}

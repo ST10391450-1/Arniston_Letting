@@ -1,0 +1,123 @@
+﻿body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #d9d9d9;
+    color: #000000;
+}
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    padding: 36px;
+    border-radius: 8px;
+    border-top: 5px solid #02bea0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-sizing: border-box;
+}
+
+    .login-card h1 {
+        text-align: center;
+        margin: 0 0 28px;
+        color: #000000;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 7px;
+        color: #000000;
+        font-weight: bold;
+        font-size: 14px;
+    }
+
+    .form-group input[type="email"],
+    .form-group input[type="password"] {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #bfbfbf;
+        border-radius: 6px;
+        background: #ffffff;
+        color: #000000;
+        font-size: 14px;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+        .form-group input[type="email"]:focus,
+        .form-group input[type="password"]:focus {
+            border-color: #02bea0;
+            box-shadow: 0 0 0 2px rgba(2, 190, 160, 0.15);
+        }
+
+    .form-group input::placeholder {
+        color: #8e8e93;
+    }
+
+.remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 22px;
+    color: #404040;
+    font-size: 14px;
+}
+
+    .remember input {
+        accent-color: #02bea0;
+    }
+
+    .remember label {
+        margin: 0;
+    }
+
+.login-button {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 6px;
+    background: #02bea0;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+    .login-button:hover {
+        background: #009f88;
+    }
+
+    .login-button:active {
+        background: #008f7a;
+    }
+
+.register-link {
+    text-align: center;
+    margin-top: 20px;
+    color: #404040;
+}
+
+    .register-link a {
+        color: #02bea0;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }

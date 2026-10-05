@@ -1,0 +1,42 @@
+/* Shared CRUD styling for admin pages */
+.crud-page { padding: 24px 28px; box-sizing: border-box; }
+.crud-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+.crud-title { font-size: 20px; font-weight: bold; color: #000; }
+.crud-search { display: flex; gap: 8px; align-items: center; }
+.crud-search input { padding: 6px 10px; border: 1px solid #bfbfbf; border-radius: 4px; min-width: 220px; }
+.crud-table-wrap { background: #fff; border: 1px solid #bfbfbf; border-radius: 4px; overflow-x: auto; margin-bottom: 20px; }
+.crud-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.crud-table th { background: #eee; text-align: left; padding: 10px 12px; border-bottom: 1px solid #bfbfbf; }
+.crud-table td { padding: 9px 12px; border-bottom: 1px solid #eee; vertical-align: middle; }
+.crud-table tr.selected td { background: #e6f8f5; }
+.crud-actions { display: flex; gap: 6px; white-space: nowrap; }
+.crud-panel { background: #fff; border: 1px solid #bfbfbf; border-radius: 4px; padding: 18px 20px; }
+.crud-panel h2 { font-size: 16px; margin: 0 0 14px; color: #02bea0; }
+.crud-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px 20px; }
+.crud-field { display: flex; flex-direction: column; gap: 4px; }
+.crud-field.wide { grid-column: 1 / -1; }
+.crud-field label { font-size: 13px; font-weight: bold; color: #404040; }
+.crud-field input[type=text], .crud-field input[type=email], .crud-field input[type=number],
+.crud-field input[type=date], .crud-field input[type=time], .crud-field select, .crud-field textarea {
+    padding: 7px 10px; border: 1px solid #bfbfbf; border-radius: 4px; font: inherit; }
+.crud-field.check { flex-direction: row; align-items: center; gap: 8px; }
+.crud-field .field-error, .field-error { color: #ff383c; font-size: 12px; }
+.crud-buttons { display: flex; gap: 10px; margin-top: 16px; }
+.btn { display: inline-block; padding: 7px 16px; border: 0; border-radius: 4px; cursor: pointer; font: inherit; font-size: 13px; text-decoration: none; color: #fff; background: #4d4d4d; }
+.btn-primary { background: #02bea0; }
+.btn-danger { background: #ff383c; }
+.btn-muted { background: #8e8e93; }
+.btn-small { padding: 4px 10px; font-size: 12px; }
+.alert { padding: 10px 14px; border-radius: 4px; margin-bottom: 14px; font-size: 14px; }
+.alert-success { background: #e8f9ed; border: 1px solid #34c759; }
+.alert-error { background: #ffeaea; border: 1px solid #ff383c; }
+.badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; color: #000; background: #eee; }
+.badge-green { background: #34c759; color: #fff; }
+.badge-amber { background: #ffcc00; }
+.badge-red { background: #ff383c; color: #fff; }
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.stat-card { background: #fff; border: 1px solid #bfbfbf; border-radius: 4px; padding: 14px 16px; }
+.stat-card span { display: block; font-size: 13px; color: #404040; }
+.stat-card strong { font-size: 26px; color: #02bea0; }
+.crud-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 900px) { .crud-grid-2 { grid-template-columns: 1fr; } }
