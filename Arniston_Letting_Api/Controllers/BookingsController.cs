@@ -92,11 +92,11 @@ public class BookingsController : ControllerBase
             });
         }
 
-        var propertyExists = await _context.Properties
+        var property = await _context.Properties
             .AsNoTracking()
-            .AnyAsync(p => p.PropertyId == request.PropertyId);
+            .FirstOrDefaultAsync(p => p.PropertyId == request.PropertyId);
 
-        if (!propertyExists)
+        if (property == null)
         {
             return BadRequest(new
             {
@@ -119,16 +119,69 @@ public class BookingsController : ControllerBase
             });
         }
 
+        var numberOfNights = (request.CheckOut - request.CheckIn).Days;
+        var calculatedRate = property.RatePerNight * numberOfNights;
+
         var booking = new Booking
         {
             PropertyId = request.PropertyId,
             BookerName = request.BookerName.Trim(),
             CheckIn = request.CheckIn,
             CheckOut = request.CheckOut,
-            Rate = request.Rate
+            Rate = calculatedRate
         };
 
         _context.Bookings.Add(booking);
+
+        await _context.SaveChangesAsync();
+
+        var now = DateTime.Now;
+
+        var notification = new Notification
+        {
+            Type = "Booking",
+            Recipient = "Admin",
+            Date = now,
+            Time = now.TimeOfDay,
+            Message = $"New booking received from {booking.BookerName} for {property.PropertyName}. Total: R{calculatedRate:N2}.",
+            Status = "Pending"
+        };
+
+        _context.Notifications.Add(notification);
+
+        var cleaner = await _context.Cleaners
+            .Where(c => c.Available)
+            .OrderBy(c => c.CleanerId)
+            .FirstOrDefaultAsync();
+
+        if (cleaner != null)
+        {
+            var cleanerTask = new CleanerTask
+            {
+                CleanerId = cleaner.CleanerId,
+                LocationId = booking.PropertyId,
+                Date = booking.CheckOut,
+                Time = new TimeSpan(10, 0, 0),
+                Completed = false,
+                Notes = $"Cleaning required after booking #{booking.BookingId}."
+            };
+
+            _context.CleanerTasks.Add(cleanerTask);
+
+            cleaner.Available = false;
+
+            var cleanerNotification = new Notification
+            {
+                Type = "CleaningAssigned",
+                Recipient = cleaner.FullName,
+                Date = now,
+                Time = now.TimeOfDay,
+                Message = $"You have been assigned cleaning for {property.PropertyName} on {booking.CheckOut:dd/MM/yyyy}.",
+                Status = "Pending"
+            };
+
+            _context.Notifications.Add(cleanerNotification);
+        }
 
         await _context.SaveChangesAsync();
 
@@ -185,11 +238,11 @@ public class BookingsController : ControllerBase
             });
         }
 
-        var propertyExists = await _context.Properties
+        var property = await _context.Properties
             .AsNoTracking()
-            .AnyAsync(p => p.PropertyId == request.PropertyId);
+            .FirstOrDefaultAsync(p => p.PropertyId == request.PropertyId);
 
-        if (!propertyExists)
+        if (property == null)
         {
             return BadRequest(new
             {
@@ -213,11 +266,30 @@ public class BookingsController : ControllerBase
             });
         }
 
+        var numberOfNights = (request.CheckOut - request.CheckIn).Days;
+        var calculatedRate = property.RatePerNight * numberOfNights;
+
         booking.PropertyId = request.PropertyId;
         booking.BookerName = request.BookerName.Trim();
         booking.CheckIn = request.CheckIn;
         booking.CheckOut = request.CheckOut;
-        booking.Rate = request.Rate;
+        booking.Rate = calculatedRate;
+
+        await _context.SaveChangesAsync();
+
+        var now = DateTime.Now;
+
+        var notification = new Notification
+        {
+            Type = "BookingUpdated",
+            Recipient = "Admin",
+            Date = now,
+            Time = now.TimeOfDay,
+            Message = $"Booking #{booking.BookingId} for {booking.BookerName} has been updated. Total: R{calculatedRate:N2}.",
+            Status = "Pending"
+        };
+
+        _context.Notifications.Add(notification);
 
         await _context.SaveChangesAsync();
 
