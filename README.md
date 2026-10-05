@@ -1,6 +1,8 @@
 # Arniston Letting
 
-A property management web application developed for **INSY7315 Work Integrated Learning — Task 2**.
+Hosted At https://arniston.duckdns.org/Login 
+
+This is hosted on an old laptop temporarily since existing hosting service did not have support for .Net 10 nor Asp.Net Core
 
 Arniston Letting provides a centralised system for managing properties, owners, bookings, cleaners, tasks, breakages, notifications and reports.
 
