@@ -279,20 +279,10 @@ Production deployment is handled separately.
 
 ## Team Contributions
 
-| Member        | Student Number | Contribution                               |
-| ------------- | -------------- | ------------------------------------------ |
-| Dwayne Prins  | ST10032544     | Server, hosting and deployment             |
-| Thomas Dennis | ST10391450     | Application development and implementation |
-
-## Current Limitations
-
-* Authentication and authorisation should be strengthened before production use with sensitive data.
-* CORS should be restricted to the production frontend.
-* The demonstration administrator account should not be used in production.
-* Database migrations should be managed for future production changes.
-* Automated test coverage should be expanded.
-* GitHub Actions currently builds and publishes artifacts but does not automatically deploy the server.
-* Notification records do not confirm actual email or SMS delivery.
+| Member        | Student Number 
+| ------------- | -------------- 
+| Dwayne Prins  | ST10032544     
+| Thomas Dennis | ST10391450     
 
 ## Repository
 
