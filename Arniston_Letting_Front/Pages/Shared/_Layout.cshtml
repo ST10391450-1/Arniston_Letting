@@ -7,7 +7,7 @@
 <title>@ViewData["Title"] - Arniston Holiday Letting</title>
 
 <link rel="icon"
-      type="image/x-icon"
+      type="image/png"
       href="~/Assests/icon.png"
       asp-append-version="true" />
 
@@ -35,9 +35,11 @@
 
 @if (!(ViewData["NoNav"] as bool? ?? false))
 {
+    <a class="visually-hidden-focusable" href="#main-content">Skip to main content</a>
+
     <partial name="_Nav" />
 
-    <main class="page-content">
+    <main id="main-content" class="page-content">
         @RenderBody()
     </main>
 }

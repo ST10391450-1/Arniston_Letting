@@ -1,0 +1,77 @@
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: arniston-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-arniston_letting}
+      MYSQL_USER: ${MYSQL_USER:-arniston_api}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - database
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mysqladmin ping -h 127.0.0.1 -uroot -p"$${MYSQL_ROOT_PASSWORD}" --silent
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
+  api:
+    container_name: arniston-api
+    build:
+      context: ./Arniston_Letting_Api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+
+      ConnectionStrings__DefaultConnection: "Server=mysql;Port=3306;Database=${MYSQL_DATABASE:-arniston_letting};User=${MYSQL_USER:-arniston_api};Password=${MYSQL_PASSWORD};"
+
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in .env}
+      Jwt__Issuer: ArnistonLettingAPI
+      Jwt__Audience: ArnistonLettingFront
+
+      Seed__AdminEmail: ${SEED_ADMIN_EMAIL:-admin@arnistonletting.co.za}
+      Seed__AdminPassword: ${SEED_ADMIN_PASSWORD:?Set SEED_ADMIN_PASSWORD in .env}
+    expose:
+      - "8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app
+      - database
+
+  frontend:
+    container_name: arniston-frontend
+    build:
+      context: ./Arniston_Letting_Front
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ApiSettings__BaseUrl: http://api:8080/
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+    networks:
+      - app
+
+volumes:
+  mysql_data:
+
+networks:
+  app:
+    driver: bridge
+  database:
+    driver: bridge
+    internal: true

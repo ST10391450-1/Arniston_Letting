@@ -2,6 +2,7 @@ using Arniston_Letting_API.Data;
 using Arniston_Letting_API.Services;
 using Arniston_Letting_API.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -11,6 +12,22 @@ using System.Threading.RateLimiting;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+// The API sits behind Nginx in production. Without this, every request
+// appears to come from the proxy's IP address, which makes the per-IP
+// login rate limit below apply to ALL users as one shared bucket.
+// Only loopback proxies are trusted by default, so spoofed headers from
+// the internet are ignored.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto;
+});
+
+// Lightweight liveness endpoint (mapped at /health) for Nginx / systemd /
+// uptime monitors.
+builder.Services.AddHealthChecks();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -114,13 +131,25 @@ builder.Services.AddRateLimiter(options =>
             }));
 });
 
+// Allowed CORS origins can be overridden in configuration, e.g.
+// Cors__AllowedOrigins__0=https://example.com. The existing production
+// origin remains the default so current deployments are unaffected.
+var allowedOrigins =
+    builder.Configuration
+        .GetSection("Cors:AllowedOrigins")
+        .Get<string[]>();
+
+if (allowedOrigins == null || allowedOrigins.Length == 0)
+{
+    allowedOrigins = new[] { "https://arniston.duckdns.org" };
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins(
-                "https://arniston.duckdns.org")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -134,8 +163,27 @@ using (var scope = app.Services.CreateScope())
         scope.ServiceProvider
             .GetRequiredService<ApplicationDbContext>();
 
-    await DbInitializer.InitializeAsync(context);
+    await DbInitializer.InitializeAsync(
+        context,
+        app.Configuration,
+        app.Environment,
+        app.Logger);
 }
+
+// Must run first so the client IP and scheme are correct for everything below.
+app.UseForwardedHeaders();
+
+// Basic hardening headers for every API response.
+app.Use(async (context, next) =>
+{
+    var headers = context.Response.Headers;
+
+    headers["X-Content-Type-Options"] = "nosniff";
+    headers["X-Frame-Options"] = "DENY";
+    headers["Referrer-Policy"] = "no-referrer";
+
+    await next();
+});
 
 if (app.Environment.IsDevelopment())
 {
@@ -154,5 +202,7 @@ app.UseAuthorization();
 app.UseRateLimiter();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health").AllowAnonymous();
 
 app.Run();

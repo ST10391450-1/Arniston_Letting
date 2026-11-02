@@ -6,6 +6,12 @@ using Microsoft.AspNetCore.RateLimiting;
 
 namespace Arniston_Letting_API.Controllers;
 
+#region Login
+/*
+        Controller page for the login and authentication of login details
+ */
+
+
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
@@ -17,30 +23,18 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-   /* [AllowAnonymous]
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(
-        [FromBody] RegisterRequest request)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        var response = await _authService.RegisterAsync(request);
-
-        if (response == null)
-        {
-            return BadRequest(new
-            {
-                success = false,
-                message = "Account could not be created."
-            });
-        }
-
-        return Ok(response);
-    }
-   */
+   
+    /*
+     *          Functionality for user to log in 
+     * 
+     *      [AllowAnonymouse] Will allow the user to access the function without being logged in with a session token. 
+     *      
+     *      [EnableRateLimiting] Prevents the constant logging in attempts by limiting the amount of attempts possible. 
+     *      
+     *      Connects credentials that a user enter to the authenitication service and will return either 401 or 200 depending on success or failure
+     * 
+     * 
+     */
 
     [AllowAnonymous]
     [EnableRateLimiting("LoginPolicy")]
@@ -66,6 +60,23 @@ public class AuthController : ControllerBase
 
         return Ok(response);
     }
+#endregion
+
+
+#region Log Out
+    /*
+     * 
+     *      Allows user to logout 
+     *      
+     *      
+     *      [Authorize] requires user to have auth token in order to access the function
+     *      
+     *      Checks the users ID and mathes to the user ID provided in the request.
+     *      (Prevents users from logging out others) 
+     *      
+     *      Connects the logout request to the authentication service and returns the result
+     * 
+     */
 
     [Authorize]
     [HttpPost("logout/{userId:int}")]
@@ -98,4 +109,7 @@ public class AuthController : ControllerBase
             message = "Logout successful."
         });
     }
+
+    #endregion
+
 }

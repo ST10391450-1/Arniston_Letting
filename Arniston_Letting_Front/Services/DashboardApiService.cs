@@ -22,7 +22,7 @@ public class DashboardApiService : IDashboardApiService
         {
             return await _http.GetFromJsonAsync<DashboardDto>("api/Dashboard");
         }
-        catch (HttpRequestException)
+        catch (Exception apiEx) when (apiEx is HttpRequestException or TaskCanceledException)
         {
             return null;
         }
@@ -44,7 +44,7 @@ public class DashboardApiService : IDashboardApiService
             return await _http.GetFromJsonAsync<IEnumerable<T>>(url)
                    ?? Enumerable.Empty<T>();
         }
-        catch (HttpRequestException)
+        catch (Exception apiEx) when (apiEx is HttpRequestException or TaskCanceledException)
         {
             return Enumerable.Empty<T>();
         }

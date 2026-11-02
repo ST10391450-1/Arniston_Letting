@@ -22,7 +22,7 @@ public class ReportApiService
             }
             return await response.Content.ReadFromJsonAsync<ReportDto>();
         }
-        catch (HttpRequestException)
+        catch (Exception apiEx) when (apiEx is HttpRequestException or TaskCanceledException)
         {
             return null;
         }
