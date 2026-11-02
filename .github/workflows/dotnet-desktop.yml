@@ -1,0 +1,50 @@
+name: Arniston Letting Build
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore Arniston_Letting.slnx
+
+      - name: Build
+        run: dotnet build Arniston_Letting.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Arniston_Letting.slnx --configuration Release --no-build
+
+      - name: Publish API
+        run: dotnet publish Arniston_Letting_Api/Arniston_Letting_Api.csproj --configuration Release --output ./publish/api --no-restore
+
+      - name: Publish Frontend
+        run: dotnet publish Arniston_Letting_Front/Arniston_Letting_Front.csproj --configuration Release --output ./publish/front --no-restore
+
+      - name: Upload API
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arniston-Letting-API
+          path: publish/api
+
+      - name: Upload Frontend
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arniston-Letting-Frontend
+          path: publish/front
